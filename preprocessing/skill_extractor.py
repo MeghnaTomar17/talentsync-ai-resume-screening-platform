@@ -4,17 +4,33 @@ skill_variations = {
 
     "java": ["java"],
 
-    "javascript": [
-        "javascript",
-        "js"
-    ],
+    "javascript": ["javascript", "js"],
+
+    "typescript": ["typescript", "ts"],
+
+    "react": ["react", "reactjs"],
+
+    "nodejs": ["node", "nodejs"],
 
     "machine learning": [
         "machine learning",
         "ml"
     ],
 
+    "deep learning": [
+        "deep learning"
+    ],
+
+    "nlp": [
+        "nlp",
+        "natural language processing"
+    ],
+
     "sql": ["sql"],
+
+    "mongodb": ["mongodb"],
+
+    "mysql": ["mysql"],
 
     "html": ["html"],
 
@@ -25,12 +41,33 @@ skill_variations = {
         "github"
     ],
 
+    "docker": ["docker"],
+
+    "aws": ["aws"],
+
+    "tensorflow": ["tensorflow"],
+
+    "pytorch": ["pytorch"],
+
+    "data analysis": [
+        "data analysis",
+        "analytics"
+    ],
+
     "communication": [
         "communication"
     ],
 
     "leadership": [
         "leadership"
+    ],
+
+    "problem solving": [
+        "problem solving"
+    ],
+
+    "teamwork": [
+        "teamwork"
     ]
 }
 
