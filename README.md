@@ -102,8 +102,9 @@ TalentSyncAI/
 │
 ├── README.md
 └── requirements.txt
+```
 
-## Interactive Resume Analysis Dashboard
+#   Interactive Resume Analysis Dashboard
 
 The project now includes an interactive Streamlit-based dashboard that allows users to upload PDF resumes and receive real-time analysis.
 
