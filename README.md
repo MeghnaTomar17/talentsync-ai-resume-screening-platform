@@ -74,6 +74,8 @@ TalentSync AI is an end-to-end NLP and semantic AI-based hiring intelligence sys
 TalentSyncAI/
 │
 ├── app/
+│   ├── streamlit_app.py
+
 ├── datasets/
 │   ├── resumes.csv
 │   ├── jobs.csv
@@ -100,3 +102,55 @@ TalentSyncAI/
 │
 ├── README.md
 └── requirements.txt
+
+## Interactive Resume Analysis Dashboard
+
+The project now includes an interactive Streamlit-based dashboard that allows users to upload PDF resumes and receive real-time analysis.
+
+### Dashboard Features
+
+* PDF Resume Upload
+* Automated Resume Parsing
+* NLP-Based Resume Cleaning
+* Skill Extraction & Normalization
+* Semantic Job Matching
+* ATS Score Calculation
+* Explainable AI Insights
+* Missing Skill Detection
+* Resume Quality Analysis
+* Top Job Recommendations
+* Interactive Visual Analytics
+* Real-Time Progress Tracking
+
+### User Workflow
+
+Resume Upload
+→ PDF Parsing
+→ Text Cleaning
+→ Skill Extraction
+→ Semantic Matching
+→ ATS Scoring
+→ Explainability Layer
+→ Job Recommendations
+
+This transforms TalentSync AI from a notebook-based NLP project into an end-to-end AI-powered hiring intelligence application.
+
+## Project Status
+
+Current Version: v0.2
+
+TalentSync AI has evolved from a notebook-based NLP pipeline into a modular AI application featuring semantic resume-job matching, ATS-style scoring, explainable AI, PDF resume analysis, and an interactive Streamlit dashboard.
+
+# Upcoming Enhancements
+
+* Gemini-Powered Resume Feedback
+* Personalized Skill Gap Analysis
+* AI Learning Roadmap Generator
+* Recruiter Candidate Ranking Dashboard
+* FAISS Vector Search Integration
+* Multi-Resume Candidate Comparison
+* Resume Improvement Suggestions
+* Interview Readiness Assessment
+* Cloud Deployment
+* User Authentication & Profiles
+

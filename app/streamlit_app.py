@@ -91,40 +91,48 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
 
-    with st.spinner("Analyzing Resume..."):
+    status = st.empty()
+
+    status.info("Reading Resume PDF...")
+
+    with st.spinner("Processing Resume"):
 
         try:
 
-            st.write("File uploaded")
+            status.info("Resume uploaded")
 
             with open("temp_resume.pdf", "wb") as f:
                 f.write(uploaded_file.read())
 
-            st.write("PDF saved")
+            status.info("Resume saved")
 
             resume_text = extract_text_from_pdf(
                 "temp_resume.pdf"
             )
 
-            st.write("PDF extracted")
+            status.info("Extracting text from PDF")
 
             cleaned_resume = advanced_clean_text(
                 resume_text
             )
 
-            st.write("Resume cleaned")
+            status.info("Cleaning resume text")
 
             resume_skills = advanced_skill_extractor(
                 cleaned_resume
             )
 
-            st.write("Skills extracted")
+            status.info("Extracting skills")
 
             all_scores = []
 
             progress = st.progress(0)
 
             total_jobs = len(job_df)
+
+            st.info(f"Scanning {len(job_df)} job descriptions...")
+
+            progress_text = st.empty()
 
             for index, row in job_df.iterrows():
 
@@ -139,9 +147,15 @@ if uploaded_file is not None:
                     (index + 1) / total_jobs
                 )
 
-            st.write("Semantic matching completed")
+                progress_text.write(f"Analyzing Job {index + 1}/{total_jobs}")
 
-            st.success("Pipeline working!")
+            status.info("Semantic matching completed")
+
+            status.success("✅ Resume Analysis Complete!")
+
+            st.toast("Analysis completed successfully!", icon="🎉")
+
+            st.balloons()
 
         except Exception as e:
 
@@ -244,6 +258,22 @@ if uploaded_file is not None:
 
     st.success(best_job_title)
 
+    st.subheader("Debug Information")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("Resume Skills")
+        st.write(resume_skills)
+
+    with col2:
+        st.write("Job Skills")
+        st.write(job_skills)
+
+    with st.expander(
+    "View Matched Job Description"):
+
+        st.write(best_job["Job Description"])
     # ---------------------------------------------------
     # SCORE CARDS
     # ---------------------------------------------------
@@ -375,21 +405,20 @@ if uploaded_file is not None:
     # TOP JOB RECOMMENDATIONS
     # ---------------------------------------------------
 
+    
     st.subheader("Top Recommended Jobs")
 
     top_jobs = job_df.sort_values(
-
         by="semantic_score",
-
         ascending=False
+        ).head(5)
 
-    )[["Job Title", "semantic_score"]].head(5)
+    for rank, (_, row) in enumerate(
+        top_jobs.iterrows(),
+        start=1
+    ):
 
-    top_jobs.columns = [
-
-        "Job Title",
-
-        "Match Score"
-    ]
-
-    st.dataframe(top_jobs)
+        st.write(
+            f"{rank}. {row['Job Title']} "
+            f"({row['semantic_score']:.2f}%)"
+        )
