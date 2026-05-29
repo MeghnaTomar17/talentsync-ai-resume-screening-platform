@@ -4,22 +4,21 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
+# ---------------------------------------------------
+# LOAD ENV VARIABLES
+# ---------------------------------------------------
+
 env_path = Path(__file__).resolve().parent.parent / ".env"
 
 load_dotenv(dotenv_path=env_path)
-
-print("ENV PATH:", env_path)
-key = os.getenv("GEMINI_API_KEY")
-
-print("ENV PATH:", env_path)
-print("KEY FOUND:", key is not None)
 
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
-
-
+# ---------------------------------------------------
+# GENERATE RESUME FEEDBACK
+# ---------------------------------------------------
 
 def generate_resume_feedback(
 
@@ -33,45 +32,66 @@ def generate_resume_feedback(
 
 ):
 
-    prompt = f"""
-You are an expert recruiter and ATS consultant.
+    try:
 
-Candidate Resume:
+        prompt = f"""
+You are an expert recruiter, ATS consultant, and career mentor.
 
-{resume_text[:4000]}
+Analyze the following candidate information.
 
-Detected Skills:
+Target Job:
+{target_job}
 
+Resume Skills:
 {resume_skills}
 
 Missing Skills:
-
 {missing_skills}
 
-Target Job:
+Resume Content:
+{resume_text[:4000]}
 
-{target_job}
+Provide your response in the following format:
 
-Provide:
+## Strengths
+- List key strengths
 
-1. Resume strengths
-2. Resume weaknesses
-3. Missing skills analysis
-4. ATS improvement suggestions
-5. Learning recommendations
+## Weaknesses
+- List weaknesses
 
-Keep response structured and concise.
+## Missing Skills Analysis
+- Explain which missing skills are important
+
+## ATS Improvement Suggestions
+- Suggest improvements for ATS score
+
+## Career Recommendations
+- Suggest learning paths, projects, or certifications
+
+Keep the response practical, concise, and personalized.
 """
 
-    model = genai.GenerativeModel(
-        "gemini-2.5-flash"
-    )
+        model = genai.GenerativeModel(
+            "gemini-2.5-flash"
+        )
 
-    print("Generating Gemini feedback...")
+        response = model.generate_content(
+            prompt
+        )
 
-    response = model.generate_content(
-        prompt
-    )
-    print("Gemini feedback generated.")
+        return response.text
 
-    return response.text
+    except Exception as e:
+
+        return f"""
+ Feedback Generation Failed
+
+Error:
+{str(e)}
+
+Please verify:
+- Internet connection
+- Gemini API key
+- Gemini API quota
+- Model availability
+"""

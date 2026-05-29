@@ -6,8 +6,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 
+
+
 sys.path.append(".")
 sys.path.append("..")
+
+from utils.llm_feedback import (
+    generate_resume_feedback
+)
 
 from preprocessing.text_cleaner import advanced_clean_text
 
@@ -250,6 +256,21 @@ if uploaded_file is not None:
         final_ats_score
     )
 
+    with st.spinner(
+    "Generating AI Resume Feedback..."
+):
+
+        feedback = generate_resume_feedback(
+
+            cleaned_resume,
+
+            resume_skills,
+
+            explanation["missing_skills"],
+
+            best_job_title
+        )
+
     # ---------------------------------------------------
     # DASHBOARD
     # ---------------------------------------------------
@@ -421,4 +442,16 @@ if uploaded_file is not None:
         st.write(
             f"{rank}. {row['Job Title']} "
             f"({row['semantic_score']:.2f}%)"
+        )
+
+    st.subheader(
+        "AI Resume Coach"
+    )
+
+    with st.expander(
+        "View Personalized Resume Feedback"
+    ):
+
+        st.markdown(
+            feedback
         )
