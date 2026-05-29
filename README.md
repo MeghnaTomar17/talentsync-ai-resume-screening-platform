@@ -136,6 +136,16 @@ Resume Upload
 
 This transforms TalentSync AI from a notebook-based NLP project into an end-to-end AI-powered hiring intelligence application.
 
+# LLM-Powered Resume Feedback
+
+## Uses Google's Gemini model to:
+
+• Analyze resume strengths
+• Identify weaknesses
+• Suggest ATS improvements
+• Recommend missing skills
+• Provide career guidance
+
 ## Project Status
 
 Current Version: v0.2
