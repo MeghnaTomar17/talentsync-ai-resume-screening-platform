@@ -15,6 +15,10 @@ from utils.llm_feedback import (
     generate_resume_feedback
 )
 
+from utils.career_roadmap import (
+    generate_career_roadmap
+)
+
 from preprocessing.text_cleaner import advanced_clean_text
 
 from preprocessing.skill_extractor import (
@@ -157,7 +161,7 @@ if uploaded_file is not None:
 
             status.info("Semantic matching completed")
 
-            status.success("✅ Resume Analysis Complete!")
+            status.success("Resume Analysis Complete!")
 
             st.toast("Analysis completed successfully!", icon="🎉")
 
@@ -269,6 +273,19 @@ if uploaded_file is not None:
             explanation["missing_skills"],
 
             best_job_title
+        )
+
+    with st.spinner(
+    "Generating Career Roadmap..."
+):
+
+        roadmap = generate_career_roadmap(
+
+            best_job_title,
+
+            resume_skills,
+
+            explanation["missing_skills"]
         )
 
     # ---------------------------------------------------
@@ -455,3 +472,11 @@ if uploaded_file is not None:
         st.markdown(
             feedback
         )
+
+    st.subheader(
+    "Career Growth Roadmap"
+)
+
+    st.markdown(
+        roadmap
+    )
