@@ -408,10 +408,10 @@ Some ATS systems may struggle to parse
 all information correctly.
 
 For best ATS performance:
-✅ Use a single-column layout
-✅ Use clear section headings
-✅ Avoid excessive graphics
-✅ Keep skills in a dedicated section
+Use a single-column layout
+Use clear section headings
+Avoid excessive graphics
+Keep skills in a dedicated section
 """
         )
 

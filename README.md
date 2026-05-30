@@ -1,167 +1,334 @@
-# TalentSync AI   
-### AI-Powered Resume Screening & Skill Gap Analysis Platform
+# TalentSync AI
 
-TalentSync AI is an end-to-end NLP and semantic AI-based hiring intelligence system designed to automate resume screening, candidate-job matching, ATS-style scoring, and skill-gap analysis. The project focuses heavily on real-world AI engineering workflows such as preprocessing pipelines, semantic embeddings, modular architecture, and explainable AI rather than only model training.
+## AI-Powered Resume Screening, Career Intelligence & Skill Gap Analysis Platform
 
----
+TalentSync AI is an end-to-end AI-powered hiring intelligence platform that automates resume screening, semantic candidate-job matching, ATS-style evaluation, skill gap detection, and personalized career guidance.
 
-##  Features
-
--  PDF Resume Parsing using `pdfplumber`
--  Advanced NLP preprocessing pipeline
--  Token-aware skill extraction & normalization
--  TF-IDF based similarity matching
--  Semantic embedding matching using Sentence Transformers
--  ATS-style weighted scoring system
--  Skill-gap analysis & recommendations
--  Resume ranking & intelligent job recommendations
--  Modular production-style architecture
--  Real-world recruiter workflow simulation
+Unlike traditional resume checkers that rely solely on keyword matching, TalentSync leverages Natural Language Processing (NLP), Sentence Embeddings, Explainable AI, and Large Language Models (LLMs) to provide recruiter-grade resume analysis and actionable career recommendations.
 
 ---
 
-#  AI & NLP Techniques Used
+# Key Features
+
+### Resume Analysis
+
+* PDF Resume Parsing using `pdfplumber`
+* Advanced NLP Preprocessing Pipeline
+* Resume Text Cleaning & Normalization
+* Automated Skill Extraction
+* Resume Quality Assessment
+* ATS Compatibility Analysis
+* Resume Type Detection (ATS-Friendly, Modern, Canva-Style, Graphic Heavy)
+
+### Semantic Matching Engine
+
+* Sentence Transformer Embeddings
+* Semantic Resume-Job Matching
+* Embedding-Based Similarity Search
+* Top Job Recommendation System
+* Job Ranking & Relevance Scoring
+
+### ATS Intelligence
+
+* Weighted ATS Scoring System
+* Skill Gap Analysis
+* Matched Skills Detection
+* Missing Skills Identification
+* Resume Improvement Suggestions
+
+### Explainable AI Layer
+
+* Transparent ATS Scoring
+* Resume Quality Warnings
+* Extraction Quality Analysis
+* ATS Compatibility Insights
+* Actionable Recommendations
+
+### LLM-Powered Career Intelligence
+
+Powered by Google Gemini
+
+* AI Resume Coach
+* Resume Strength Analysis
+* Resume Weakness Analysis
+* ATS Improvement Suggestions
+* Learning Recommendations
+* Project Recommendations
+* Certification Recommendations
+* Interview Readiness Assessment
+* Hiring Recommendation
+
+### Career Growth Features
+
+* Personalized Skill Gap Analysis
+* AI Career Roadmap Generator
+* 30-Day Learning Plan
+* Weekly Skill Development Guidance
+* Career Growth Recommendations
+
+### Interactive Dashboard
+
+Built with Streamlit
+
+* PDF Resume Upload
+* Real-Time Analysis
+* Progress Tracking
+* Interactive Visualizations
+* Resume Insights Dashboard
+* Career Guidance Dashboard
+
+---
+
+# AI & NLP Techniques Used
 
 ## Classical NLP
-- Text Cleaning
-- Regex Normalization
-- Tokenization
-- Stopword Removal
-- Lemmatization
-- TF-IDF Vectorization
-- Cosine Similarity
 
-## Modern NLP / Semantic AI
-- Sentence Embeddings
-- HuggingFace Sentence Transformers
-- Semantic Similarity Search
-- Embedding-based Ranking
+* Text Cleaning
+* Regex Normalization
+* Tokenization
+* Stopword Removal
+* Lemmatization
+* TF-IDF Vectorization
+* Cosine Similarity
+
+## Semantic AI
+
+* Sentence Embeddings
+* Semantic Similarity Search
+* Embedding-Based Retrieval
+* Candidate-Job Matching
+* Context-Aware Ranking
+
+## Explainable AI
+
+* ATS Score Decomposition
+* Skill Gap Detection
+* Matched vs Missing Skills Analysis
+* Resume Quality Assessment
+
+## Generative AI
+
+* Prompt Engineering
+* Gemini 2.5 Flash Integration
+* Career Guidance Generation
+* Resume Feedback Generation
+* Learning Roadmap Generation
 
 ---
 
-#  Tech Stack
+# Tech Stack
 
-## Languages
-- Python
+## Programming Language
+
+* Python
 
 ## AI / NLP Libraries
-- NLTK
-- Sentence Transformers
-- HuggingFace Transformers
-- Scikit-learn
 
-## Data Handling & Visualization
-- Pandas
-- Matplotlib
-- Seaborn
+* NLTK
+* Sentence Transformers
+* Hugging Face Transformers
+* Scikit-Learn
+* Google Generative AI
+
+## Data Processing
+
+* Pandas
+* NumPy
+
+## Visualization
+
+* Matplotlib
 
 ## Parsing & Utilities
-- pdfplumber
-- BeautifulSoup
-- Regex
 
-## Tools & Platforms
-- VS Code
-- Git
-- GitHub
-- Jupyter Notebook
+* pdfplumber
+* BeautifulSoup
+* Regex
+* python-dotenv
+
+## Frontend
+
+* Streamlit
+
+## Development Tools
+
+* VS Code
+* Jupyter Notebook
+* Git
+* GitHub
 
 ---
 
-#  Project Structure
+# Project Architecture
+
+```text
+Resume PDF
+      ↓
+PDF Parsing
+      ↓
+NLP Cleaning
+      ↓
+Skill Extraction
+      ↓
+Resume Quality Analysis
+      ↓
+ATS Compatibility Detection
+      ↓
+Sentence Embeddings
+      ↓
+Semantic Matching
+      ↓
+Job Recommendation Engine
+      ↓
+ATS Scoring Engine
+      ↓
+Explainable AI Layer
+      ↓
+Gemini Resume Coach
+      ↓
+Career Roadmap Generator
+      ↓
+Interactive Dashboard
+```
+
+---
+
+# Project Structure
 
 ```bash
 TalentSyncAI/
 │
 ├── app/
-│   ├── streamlit_app.py
-
+│   └── streamlit_app.py
+│
 ├── datasets/
-│   ├── resumes.csv
 │   ├── jobs.csv
+│   └── resumes.csv
 │
 ├── matching/
 │   ├── semantic_matcher.py
 │   ├── ats_scorer.py
 │
 ├── pdf_parser/
-│   ├── pdf_reader.py
+│   └── pdf_reader.py
 │
 ├── preprocessing/
 │   ├── text_cleaner.py
 │   ├── skill_extractor.py
 │
+├── utils/
+│   ├── explainability.py
+│   ├── extraction_quality.py
+│   ├── llm_feedback.py
+│   └── career_roadmap.py
+│
 ├── notebooks/
 │   ├── preprocessing_pipeline.ipynb
 │   ├── pdf_resume_parser.ipynb
 │
+├── outputs/
+├── visuals/
 ├── sample_resume/
 ├── synthetic_data/
-├── visuals/
-├── outputs/
 │
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── .env
 ```
 
-#   Interactive Resume Analysis Dashboard
+---
 
-The project now includes an interactive Streamlit-based dashboard that allows users to upload PDF resumes and receive real-time analysis.
+# Interactive User Workflow
 
-### Dashboard Features
+```text
+Upload Resume
+      ↓
+Resume Parsing
+      ↓
+Text Cleaning
+      ↓
+Skill Extraction
+      ↓
+Resume Quality Analysis
+      ↓
+ATS Compatibility Evaluation
+      ↓
+Semantic Job Matching
+      ↓
+ATS Score Calculation
+      ↓
+Skill Gap Detection
+      ↓
+Top Job Recommendations
+      ↓
+AI Resume Coach
+      ↓
+Career Roadmap Generation
+```
 
-* PDF Resume Upload
-* Automated Resume Parsing
-* NLP-Based Resume Cleaning
-* Skill Extraction & Normalization
-* Semantic Job Matching
-* ATS Score Calculation
+---
+
+# Challenges Solved
+
+### Resume Parsing Challenges
+
+* Handled different resume formats
+* Managed noisy PDF extraction
+* Addressed Canva-style resume limitations
+
+### NLP Challenges
+
+* Preserved semantic meaning during cleaning
+* Normalized skill representations
+* Improved extraction consistency
+
+### Explainability Challenges
+
+* Provided reasoning behind ATS scores
+* Highlighted missing skills and skill gaps
+* Generated actionable recommendations
+
+### LLM Integration Challenges
+
+* Gemini API integration
+* Prompt engineering for recruiter-style feedback
+* Personalized career guidance generation
+
+---
+
+# Current Version
+
+### TalentSync AI v0.4
+
+Current Capabilities:
+
+* Semantic Resume Matching
+* ATS Evaluation
 * Explainable AI Insights
-* Missing Skill Detection
 * Resume Quality Analysis
-* Top Job Recommendations
-* Interactive Visual Analytics
-* Real-Time Progress Tracking
+* AI Resume Coaching
+* Career Roadmap Generation
+* Interactive Streamlit Dashboard
 
-### User Workflow
+---
 
-Resume Upload
-→ PDF Parsing
-→ Text Cleaning
-→ Skill Extraction
-→ Semantic Matching
-→ ATS Scoring
-→ Explainability Layer
-→ Job Recommendations
+# Planned Enhancements
 
-This transforms TalentSync AI from a notebook-based NLP project into an end-to-end AI-powered hiring intelligence application.
+### AI Engineering Roadmap
 
-# LLM-Powered Resume Feedback
-
-## Uses Google's Gemini model to:
-
-• Analyze resume strengths
-• Identify weaknesses
-• Suggest ATS improvements
-• Recommend missing skills
-• Provide career guidance
-
-## Project Status
-
-Current Version: v0.2
-
-TalentSync AI has evolved from a notebook-based NLP pipeline into a modular AI application featuring semantic resume-job matching, ATS-style scoring, explainable AI, PDF resume analysis, and an interactive Streamlit dashboard.
-
-# Upcoming Enhancements
-
-* Gemini-Powered Resume Feedback
-* Personalized Skill Gap Analysis
-* AI Learning Roadmap Generator
-* Recruiter Candidate Ranking Dashboard
-* FAISS Vector Search Integration
-* Multi-Resume Candidate Comparison
-* Resume Improvement Suggestions
-* Interview Readiness Assessment
+* FAISS Vector Search
+* Vector Database Integration
+* Multi-Resume Candidate Ranking
+* Recruiter Dashboard
+* Resume Bullet Rewriter
+* Interview Preparation Assistant
+* Multi-Language Resume Analysis
+* Docker Deployment
 * Cloud Deployment
 * User Authentication & Profiles
 
+---
+
+# Future Vision
+
+TalentSync AI aims to evolve from a resume screening application into a complete AI-powered Career Intelligence Platform that assists candidates throughout their professional growth journey—from resume optimization and job matching to personalized learning and career planning.
