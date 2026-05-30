@@ -19,6 +19,10 @@ from utils.career_roadmap import (
     generate_career_roadmap
 )
 
+from utils.extraction_quality import (
+    analyze_extraction_quality
+)
+
 from preprocessing.text_cleaner import advanced_clean_text
 
 from preprocessing.skill_extractor import (
@@ -132,6 +136,13 @@ if uploaded_file is not None:
                 cleaned_resume
             )
 
+            quality_report = analyze_extraction_quality(
+
+                cleaned_resume,
+
+                resume_skills
+            )
+
             status.info("Extracting skills")
 
             all_scores = []
@@ -220,6 +231,8 @@ if uploaded_file is not None:
             set(resume_skills)
         )
     )
+
+    
 
     # ---------------------------------------------------
     # ATS SCORING
@@ -312,6 +325,141 @@ if uploaded_file is not None:
     "View Matched Job Description"):
 
         st.write(best_job["Job Description"])
+    
+    # ==================================================
+# RESUME QUALITY ANALYSIS
+# ==================================================
+
+    st.subheader("Resume Quality Analysis")
+
+    quality_score = quality_report["quality_score"]
+
+    ats_score = quality_report["ats_score"]
+
+    resume_type = quality_report["resume_type"]
+
+# --------------------------------------------------
+# QUALITY BADGE
+# --------------------------------------------------
+
+    if ats_score >= 85:
+
+        st.success(
+            "✅ ATS-Friendly Resume Detected"
+        )
+
+    elif ats_score >= 70:
+
+        st.info(
+            "ℹ️ Mostly ATS-Friendly Resume"
+        )
+
+    else:
+
+        st.warning(
+            "⚠️ ATS Compatibility Issues Detected"
+        )
+
+# --------------------------------------------------
+# MAIN METRICS
+# --------------------------------------------------
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+
+        st.metric(
+            "Extraction Quality",
+            f"{quality_score}%"
+        )
+
+    with col2:
+
+        st.metric(
+            "ATS Compatibility",
+            f"{ats_score}%"
+        )
+
+    with col3:
+
+        st.metric(
+            "Resume Type",
+            resume_type
+        )
+
+# --------------------------------------------------
+# ATS WARNING
+# --------------------------------------------------
+
+    if ats_score < 70:
+
+        st.warning(
+            """
+     This resume appears to use a complex layout.
+
+Possible causes:
+- Canva template
+- Multi-column design
+- Icons and graphics
+- Text boxes
+- Decorative formatting
+
+Some ATS systems may struggle to parse
+all information correctly.
+
+For best ATS performance:
+✅ Use a single-column layout
+✅ Use clear section headings
+✅ Avoid excessive graphics
+✅ Keep skills in a dedicated section
+"""
+        )
+
+# --------------------------------------------------
+# DETAILS
+# --------------------------------------------------
+
+    with st.expander(
+        "View Extraction Details"
+    ):
+
+        st.write(
+            f"**Characters Extracted:** {quality_report['text_length']}"
+        )
+
+        st.write(
+            f"**Skills Detected:** {quality_report['skill_count']}"
+        )
+
+        st.write(
+            f"**Extraction Quality Level:** {quality_report['quality_level']}"
+        )
+
+        if quality_report["warnings"]:
+
+            st.markdown("### ⚠️ Detected Issues")
+
+            for warning in quality_report["warnings"]:
+
+                st.write(
+                    f"- {warning}"
+                )
+
+# --------------------------------------------------
+# RECOMMENDATIONS
+# --------------------------------------------------
+
+    if quality_report["recommendations"]:
+
+        st.subheader(
+            "🛠 Resume Improvement Suggestions"
+        )
+
+        for recommendation in quality_report["recommendations"]:
+
+            st.info(
+                recommendation
+            )
     # ---------------------------------------------------
     # SCORE CARDS
     # ---------------------------------------------------
