@@ -50,6 +50,10 @@ from utils.explainability import (
     generate_match_explanation
 )
 
+from retrieval.faiss_retriever import (
+    retrieve_top_jobs
+)
+
 # ---------------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------------
@@ -74,19 +78,8 @@ st.subheader(
 # ---------------------------------------------------
 # LOAD JOB DATASET
 # ---------------------------------------------------
-
-job_df = pd.read_csv(
-    "datasets/jobs.csv"
-)
-
-job_df["cleaned_job_description"] = (
-
-    job_df["Job Description"]
-
-    .astype(str)
-
-    .apply(advanced_clean_text)
-)
+# Note: Jobs are now loaded via FAISS index for efficient retrieval
+# Original dataset is used for index building via build_index.py
 
 # ---------------------------------------------------
 # FILE UPLOAD
@@ -145,30 +138,31 @@ if uploaded_file is not None:
 
             status.info("Extracting skills")
 
-            all_scores = []
-
-            progress = st.progress(0)
-
-            total_jobs = len(job_df)
-
-            st.info(f"Scanning {len(job_df)} job descriptions...")
-
-            progress_text = st.empty()
-
-            for index, row in job_df.iterrows():
-
-                score = calculate_semantic_similarity(
+            # Use FAISS-based retrieval instead of brute-force search
+            status.info("Performing semantic matching with FAISS...")
+            
+            with st.spinner("Searching for best job matches"):
+                # Retrieve top jobs using FAISS (get all available jobs)
+                top_jobs = retrieve_top_jobs(
                     cleaned_resume,
-                    row["cleaned_job_description"]
+                    k=1000  # Retrieve up to 1000 jobs (adjust based on dataset size)
                 )
-
-                all_scores.append(score)
-
-                progress.progress(
-                    (index + 1) / total_jobs
-                )
-
-                progress_text.write(f"Analyzing Job {index + 1}/{total_jobs}")
+            
+            # Extract scores and rebuild job_df with semantic scores
+            all_scores = []
+            job_df_with_scores = []
+            
+            for job_info in top_jobs:
+                all_scores.append(job_info['similarity_score'])
+                job_df_with_scores.append({
+                    'Job Title': job_info['job_title'],
+                    'Job Description': job_info['job_description'],
+                    'cleaned_job_description': job_info['cleaned_description'],
+                    'semantic_score': job_info['similarity_score']
+                })
+            
+            # Convert back to DataFrame for compatibility with existing code
+            job_df = pd.DataFrame(job_df_with_scores)
 
             status.info("Semantic matching completed")
 

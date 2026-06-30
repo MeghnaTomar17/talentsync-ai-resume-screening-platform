@@ -1,4 +1,18 @@
 import re
+import nltk
+
+resources = {
+    "corpora/stopwords": "stopwords",
+    "corpora/wordnet": "wordnet",
+    "corpora/omw-1.4": "omw-1.4",
+    "tokenizers/punkt": "punkt",
+}
+
+for resource_path, resource_name in resources.items():
+    try:
+        nltk.data.find(resource_path)
+    except LookupError:
+        nltk.download(resource_name)
 
 from bs4 import BeautifulSoup
 
