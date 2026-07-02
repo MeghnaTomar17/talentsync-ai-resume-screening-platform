@@ -1,14 +1,3 @@
-/**
- * API Type Definitions
- * TypeScript types matching FastAPI backend models
- */
-
-export interface HealthCheckResponse {
-  status: string;
-  version: string;
-  services: Record<string, string>;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -17,13 +6,10 @@ export interface ApiResponse<T> {
   processing_time: number;
 }
 
-export interface ResumeUploadResponse {
-  success: boolean;
-  message: string;
-  resume_id?: string;
-  resume_text?: string;
-  cleaned_text?: string;
-  extraction_metadata?: ExtractionMetadata;
+export interface HealthCheckData {
+  status: string;
+  version: string;
+  services: Record<string, string>;
 }
 
 export interface ExtractionMetadata {
@@ -32,6 +18,14 @@ export interface ExtractionMetadata {
   ocr_used?: boolean;
   fallback_count?: number;
   success?: boolean;
+  extraction_time?: number;
+}
+
+export interface ResumeUploadData {
+  resume_id?: string | null;
+  resume_text?: string;
+  cleaned_text?: string;
+  extraction_metadata?: ExtractionMetadata;
 }
 
 export interface AnalyzeResumeRequest {
@@ -47,22 +41,32 @@ export interface JobMatch {
   ats_score?: number;
 }
 
-export interface AnalyzeResumeResponse {
-  success: boolean;
-  message: string;
+export interface QualityReport {
+  quality_score?: number;
+  quality_level?: string;
+  ats_score?: number;
+  resume_type?: string;
+  warnings?: string[];
+  recommendations?: string[];
+  text_length?: number;
+  skill_count?: number;
+  sections_detected?: number;
+}
+
+export interface AnalyzeResumeData {
   extracted_skills: string[];
   categorized_skills: Record<string, string[]>;
   skill_confidence: number;
   skill_count: number;
   extraction_method: string;
   top_jobs: JobMatch[];
-  best_match?: JobMatch;
+  best_match?: JobMatch | null;
   matched_skills: string[];
   missing_skills: string[];
-  semantic_score?: number;
-  skill_overlap_score?: number;
-  ats_score?: number;
-  quality_report?: Record<string, any>;
+  semantic_score?: number | null;
+  skill_overlap_score?: number | null;
+  ats_score?: number | null;
+  quality_report?: QualityReport | null;
 }
 
 export interface ResumeFeedbackRequest {
@@ -72,9 +76,7 @@ export interface ResumeFeedbackRequest {
   job_description?: string;
 }
 
-export interface ResumeFeedbackResponse {
-  success: boolean;
-  message: string;
+export interface ResumeFeedbackData {
   feedback: string;
   suggestions: string[];
 }
@@ -85,17 +87,13 @@ export interface CareerRoadmapRequest {
   target_role?: string;
 }
 
-export interface RoadmapMilestone {
-  phase: string;
-  skills_to_learn: string[];
-  timeline: string;
-  resources: string[];
-}
-
-export interface CareerRoadmapResponse {
-  success: boolean;
-  message: string;
+export interface CareerRoadmapData {
   target_role: string;
   roadmap: string;
   recommendations: string[];
+}
+
+export interface ResumeWorkspaceState {
+  uploaded?: ResumeUploadData;
+  analysis?: AnalyzeResumeData;
 }
