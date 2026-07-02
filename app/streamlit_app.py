@@ -5,54 +5,119 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
+import requests
 
-
+# API Configuration
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 sys.path.append(".")
 sys.path.append("..")
 
-from utils.llm_feedback import (
-    generate_resume_feedback
-)
-
-from utils.career_roadmap import (
-    generate_career_roadmap
-)
-
-from utils.extraction_quality import (
-    analyze_extraction_quality
-)
-
+# Keep direct imports for fallback and local processing
 from preprocessing.text_cleaner import advanced_clean_text
+from preprocessing.skill_extraction_pipeline import extract_skills
+from pdf_parser.pdf_reader import extract_text_from_pdf
+from utils.explainability import generate_match_explanation
+from utils.llm_feedback import generate_resume_feedback
+from utils.career_roadmap import generate_career_roadmap
 
-from preprocessing.skill_extractor import (
-    advanced_skill_extractor
-)
 
-from pdf_parser.pdf_reader import (
-    extract_text_from_pdf
-)
+# ============================================================
+# API CLIENT FUNCTIONS
+# ============================================================
 
-from matching.semantic_matcher import (
-    calculate_semantic_similarity
-)
+def call_api(endpoint: str, method: str = "GET", data: dict = None, files: dict = None):
+    """
+    Make an API call to the backend.
+    
+    Args:
+        endpoint: API endpoint path
+        method: HTTP method (GET, POST)
+        data: JSON data for POST requests
+        files: Files for multipart upload
+        
+    Returns:
+        JSON response or None on error
+    """
+    url = f"{API_BASE_URL}{endpoint}"
+    
+    try:
+        if method == "GET":
+            response = requests.get(url, timeout=30)
+        elif method == "POST":
+            if files:
+                response = requests.post(url, files=files, data=data, timeout=60)
+            else:
+                response = requests.post(url, json=data, timeout=60)
+        else:
+            st.error(f"Unsupported method: {method}")
+            return None
+        
+        response.raise_for_status()
+        payload = response.json()
+        if isinstance(payload, dict) and {"success", "message", "data"}.issubset(payload):
+            if not payload.get("success"):
+                st.error(payload.get("message", "API request failed"))
+                return None
+            return payload.get("data")
+        return payload
+        
+    except requests.exceptions.ConnectionError:
+        st.warning(f"Could not connect to backend at {API_BASE_URL}. Using local processing.")
+        return None
+    except requests.exceptions.Timeout:
+        st.error("API request timed out. Using local processing.")
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"API error: {e}")
+        return None
 
-from matching.ats_scorer import (
 
-    calculate_skill_overlap,
+def upload_resume_via_api(file_content: bytes, filename: str, enable_ocr: bool = True):
+    """Upload resume via API."""
+    return call_api(
+        "/upload_resume",
+        method="POST",
+        files={"file": (filename, file_content, "application/pdf")},
+        data={"enable_ocr": enable_ocr}
+    )
 
-    calculate_resume_quality,
 
-    calculate_final_ats_score
-)
+def analyze_resume_via_api(resume_text: str, enable_llm: bool = False):
+    """Analyze resume via API."""
+    return call_api(
+        "/analyze_resume",
+        method="POST",
+        data={"resume_text": resume_text, "enable_llm": enable_llm}
+    )
 
-from utils.explainability import (
-    generate_match_explanation
-)
 
-from retrieval.faiss_retriever import (
-    retrieve_top_jobs
-)
+def get_resume_feedback_via_api(resume_text: str, resume_skills: list, 
+                                 job_title: str = None, job_description: str = None):
+    """Get resume feedback via API."""
+    return call_api(
+        "/resume_feedback",
+        method="POST",
+        data={
+            "resume_text": resume_text,
+            "resume_skills": resume_skills,
+            "job_title": job_title,
+            "job_description": job_description
+        }
+    )
+
+
+def get_career_roadmap_via_api(resume_skills: list, missing_skills: list, target_role: str = None):
+    """Get career roadmap via API."""
+    return call_api(
+        "/career_roadmap",
+        method="POST",
+        data={
+            "resume_skills": resume_skills,
+            "missing_skills": missing_skills,
+            "target_role": target_role
+        }
+    )
 
 # ---------------------------------------------------
 # PAGE CONFIG
@@ -113,56 +178,144 @@ if uploaded_file is not None:
 
             status.info("Resume saved")
 
-            resume_text = extract_text_from_pdf(
-                "temp_resume.pdf"
-            )
-
-            status.info("Extracting text from PDF")
-
-            cleaned_resume = advanced_clean_text(
-                resume_text
-            )
-
-            status.info("Cleaning resume text")
-
-            resume_skills = advanced_skill_extractor(
-                cleaned_resume
-            )
-
-            quality_report = analyze_extraction_quality(
-
-                cleaned_resume,
-
-                resume_skills
-            )
-
-            status.info("Extracting skills")
-
-            # Use FAISS-based retrieval instead of brute-force search
-            status.info("Performing semantic matching with FAISS...")
+            # Try to use API for processing, fallback to local
+            use_api = st.checkbox("Use Backend API", value=True, help="Use FastAPI backend for processing")
             
-            with st.spinner("Searching for best job matches"):
-                # Retrieve top jobs using FAISS (get all available jobs)
-                top_jobs = retrieve_top_jobs(
-                    cleaned_resume,
-                    k=1000  # Retrieve up to 1000 jobs (adjust based on dataset size)
+            if use_api:
+                # Upload and analyze via API
+                with open("temp_resume.pdf", "rb") as f:
+                    file_content = f.read()
+                
+                # Upload resume
+                upload_result = upload_resume_via_api(file_content, "temp_resume.pdf")
+                
+                if upload_result:
+                    resume_text = upload_result.get("resume_text", "")
+                    cleaned_resume = upload_result.get("cleaned_text", "")
+                    extraction_result = {
+                        **(upload_result.get("extraction_metadata") or {}),
+                        "text": resume_text,
+                    }
+                else:
+                    extraction_result = extract_text_from_pdf("temp_resume.pdf")
+                    resume_text = extraction_result["text"]
+                    cleaned_resume = advanced_clean_text(resume_text)
+                
+                # Analyze via API
+                analysis_result = analyze_resume_via_api(cleaned_resume, enable_llm=False)
+                
+                if analysis_result:
+                    # Use API results
+                    resume_skills = analysis_result["extracted_skills"]
+                    categorized_skills = analysis_result["categorized_skills"]
+                    skill_confidence = analysis_result["skill_confidence"]
+                    skill_count = analysis_result["skill_count"]
+                    skill_extraction_result = {
+                        "extracted_skills": resume_skills,
+                        "categorized_skills": categorized_skills,
+                        "confidence_score": skill_confidence,
+                        "skill_count": skill_count,
+                    }
+                    
+                    # Build job_df from API results
+                    job_df_with_scores = []
+                    all_scores = []
+                    
+                    for job in analysis_result["top_jobs"]:
+                        all_scores.append(job["semantic_score"] / 100)  # Convert back to 0-1
+                        job_df_with_scores.append({
+                            'Job Title': job['job_title'],
+                            'Job Description': job['job_description'],
+                            'cleaned_job_description': job['job_description'],  # API doesn't return cleaned
+                            'semantic_score': job['semantic_score'] / 100
+                        })
+                    
+                    job_df = pd.DataFrame(job_df_with_scores)
+                    
+                    # Get best match
+                    if analysis_result["best_match"]:
+                        best_job_title = analysis_result["best_match"]["job_title"]
+                        best_job_description = analysis_result["best_match"]["job_description"]
+                        semantic_score = analysis_result["best_match"]["semantic_score"]
+                        matched_skills = analysis_result["matched_skills"]
+                        missing_skills = analysis_result["missing_skills"]
+                        skill_overlap_score = analysis_result["skill_overlap_score"]
+                        ats_score = analysis_result["ats_score"]
+                        quality_report = analysis_result["quality_report"]
+                        
+                        # Extract job skills for display
+                        job_skill_result = extract_skills(best_job_description, enable_llm=False)
+                        job_skills = job_skill_result["extracted_skills"]
+                    else:
+                        st.warning("No jobs found via API")
+                        st.stop()
+                else:
+                    # Fallback to local processing
+                    st.warning("API unavailable, using local processing")
+                    use_api = False
+            
+            if not use_api:
+                # Local processing (original logic)
+                extraction_result = extract_text_from_pdf("temp_resume.pdf")
+                resume_text = extraction_result["text"]
+                cleaned_resume = advanced_clean_text(resume_text)
+                
+                status.info("Extracting text from PDF")
+                status.info("Cleaning resume text")
+                
+                # Import local modules
+                from utils.extraction_quality import analyze_extraction_quality
+                from retrieval.faiss_retriever import retrieve_top_jobs
+                
+                skill_extraction_result = extract_skills(cleaned_resume, enable_llm=False)
+                resume_skills = skill_extraction_result["extracted_skills"]
+                categorized_skills = skill_extraction_result["categorized_skills"]
+                skill_confidence = skill_extraction_result["confidence_score"]
+                skill_count = skill_extraction_result["skill_count"]
+                
+                quality_report = analyze_extraction_quality(cleaned_resume, resume_skills)
+                
+                status.info("Extracting skills")
+                status.info("Performing semantic matching with FAISS...")
+                
+                with st.spinner("Searching for best job matches"):
+                    top_jobs = retrieve_top_jobs(cleaned_resume, k=1000)
+                
+                all_scores = []
+                job_df_with_scores = []
+                
+                for job_info in top_jobs:
+                    all_scores.append(job_info['similarity_score'])
+                    job_df_with_scores.append({
+                        'Job Title': job_info['job_title'],
+                        'Job Description': job_info['job_description'],
+                        'cleaned_job_description': job_info['cleaned_description'],
+                        'semantic_score': job_info['similarity_score']
+                    })
+                
+                job_df = pd.DataFrame(job_df_with_scores)
+                
+                # Get best match
+                best_job = job_df.sort_values(by="semantic_score", ascending=False).iloc[0]
+                best_job_title = best_job["Job Title"]
+                best_job_description = best_job["cleaned_job_description"]
+                semantic_score = best_job["semantic_score"]
+                
+                # Extract job skills
+                job_skill_result = extract_skills(best_job_description, enable_llm=False)
+                job_skills = job_skill_result["extracted_skills"]
+                
+                # Calculate scores
+                from matching.ats_scorer import calculate_skill_overlap, calculate_final_ats_score
+                skill_overlap_score = calculate_skill_overlap(resume_skills, job_skills)
+                ats_score = calculate_final_ats_score(
+                    semantic_score * 100,
+                    skill_overlap_score,
+                    quality_report["ats_score"]
                 )
-            
-            # Extract scores and rebuild job_df with semantic scores
-            all_scores = []
-            job_df_with_scores = []
-            
-            for job_info in top_jobs:
-                all_scores.append(job_info['similarity_score'])
-                job_df_with_scores.append({
-                    'Job Title': job_info['job_title'],
-                    'Job Description': job_info['job_description'],
-                    'cleaned_job_description': job_info['cleaned_description'],
-                    'semantic_score': job_info['similarity_score']
-                })
-            
-            # Convert back to DataFrame for compatibility with existing code
-            job_df = pd.DataFrame(job_df_with_scores)
+                
+                matched_skills = list(set(resume_skills).intersection(set(job_skills)))
+                missing_skills = list(set(job_skills) - set(resume_skills))
 
             status.info("Semantic matching completed")
 
@@ -208,9 +361,9 @@ if uploaded_file is not None:
     # JOB SKILLS
     # ---------------------------------------------------
 
-    job_skills = advanced_skill_extractor(
-        best_job_description
-    )
+    # Use new skill extraction pipeline for job skills (LLM disabled by default)
+    job_skill_result = extract_skills(best_job_description, enable_llm=False)
+    job_skills = job_skill_result["extracted_skills"]
 
     matched_skills = list(
 
@@ -226,31 +379,20 @@ if uploaded_file is not None:
         )
     )
 
-    
-
     # ---------------------------------------------------
-    # ATS SCORING
+    # ATS SCORING (if not already calculated by API)
     # ---------------------------------------------------
 
-    skill_overlap_score = calculate_skill_overlap(
+    if 'skill_overlap_score' not in locals():
+        from matching.ats_scorer import calculate_skill_overlap, calculate_resume_quality, calculate_final_ats_score
+        skill_overlap_score = calculate_skill_overlap(resume_skills, job_skills)
+        quality_score = calculate_resume_quality(cleaned_resume)
+        ats_score = calculate_final_ats_score(semantic_score * 100, skill_overlap_score, quality_score)
+    else:
+        # Already calculated by API
+        pass
 
-        resume_skills,
-
-        job_skills
-    )
-
-    quality_score = calculate_resume_quality(
-        cleaned_resume
-    )
-
-    final_ats_score = calculate_final_ats_score(
-
-        semantic_score,
-
-        skill_overlap_score,
-
-        quality_score
-    )
+    final_ats_score = ats_score
 
     # ---------------------------------------------------
     # EXPLAINABILITY
@@ -262,9 +404,9 @@ if uploaded_file is not None:
 
         job_skills,
 
-        semantic_score,
+        semantic_score * 100 if semantic_score < 1 else semantic_score,
 
-        final_ats_score
+        ats_score if 'ats_score' in locals() else skill_overlap_score
     )
 
     with st.spinner(
@@ -319,6 +461,53 @@ if uploaded_file is not None:
     "View Matched Job Description"):
 
         st.write(best_job["Job Description"])
+    
+    # ==================================================
+    # PDF EXTRACTION METADATA
+    # ==================================================
+    
+    st.subheader("PDF Extraction Details")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            "Parser Used",
+            extraction_result.get("parser_used", "Unknown")
+        )
+    
+    with col2:
+        st.metric(
+            "Extraction Confidence",
+            f"{extraction_result.get('confidence', 0)}%"
+        )
+    
+    with col3:
+        st.metric(
+            "OCR Used",
+            "Yes" if extraction_result.get("ocr_used", False) else "No"
+        )
+    
+    with col4:
+        st.metric(
+            "Fallback Count",
+            extraction_result.get("fallback_count", 0)
+        )
+    
+    with st.expander("View Extraction Details"):
+        st.write(f"**Success:** {extraction_result.get('success', False)}")
+        st.write(f"**Text Length:** {len(extraction_result.get('text', ''))} characters")
+        
+        if extraction_result.get("quality_metrics"):
+            st.write("**Quality Metrics:**")
+            for metric, value in extraction_result["quality_metrics"].items():
+                st.write(f"- {metric}: {value}")
+        
+        if extraction_result.get("all_results"):
+            st.write("**All Parser Attempts:**")
+            for result in extraction_result["all_results"]:
+                status_icon = "✅" if result["success"] else "❌"
+                st.write(f"{status_icon} {result['parser']}: {result['text_length']} chars")
     
     # ==================================================
 # RESUME QUALITY ANALYSIS
@@ -494,8 +683,24 @@ Keep skills in a dedicated section
     # ---------------------------------------------------
 
     st.subheader("Extracted Resume Skills")
-
+    
+    # Display skill extraction metadata
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total Skills", skill_extraction_result["skill_count"])
+    with col2:
+        st.metric("Extraction Confidence", f"{skill_confidence}%")
+    
     st.write(resume_skills)
+    
+    # Display categorized skills
+    if categorized_skills:
+        st.subheader("Skills by Category")
+        
+        for category, skills in categorized_skills.items():
+            if skills:  # Only show non-empty categories
+                with st.expander(f"{category} ({len(skills)})"):
+                    st.write(skills)
 
     st.subheader("Extracted Job Skills")
 

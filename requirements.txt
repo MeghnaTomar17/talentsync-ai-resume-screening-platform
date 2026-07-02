@@ -1,4 +1,13 @@
 altair==6.1.0
+# FastAPI Backend
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+requests==2.32.3
+# PDF Parsing - Multi-Layer Extraction Pipeline
+pymupdf==1.25.5
+pypdf==5.3.0
+easyocr==1.7.2
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
@@ -121,6 +130,7 @@ pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==3.0
 pydantic==2.13.4
+pydantic-settings==2.11.0
 pydantic_core==2.46.4
 pydeck==0.9.2
 Pygments==2.20.0

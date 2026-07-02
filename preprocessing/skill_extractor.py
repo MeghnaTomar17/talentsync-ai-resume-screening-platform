@@ -1,103 +1,35 @@
-skill_variations = {
+"""
+Skill Extractor - Production-Ready Pipeline
 
-    "python": ["python", "py"],
+This module provides the main interface for skill extraction
+using the multi-layer extraction pipeline with normalization and categorization.
+"""
 
-    "java": ["java"],
-
-    "javascript": ["javascript", "js"],
-
-    "typescript": ["typescript", "ts"],
-
-    "react": ["react", "reactjs"],
-
-    "nodejs": ["node", "nodejs"],
-
-    "machine learning": [
-        "machine learning",
-        "ml"
-    ],
-
-    "deep learning": [
-        "deep learning"
-    ],
-
-    "nlp": [
-        "nlp",
-        "natural language processing"
-    ],
-
-    "sql": ["sql"],
-
-    "mongodb": ["mongodb"],
-
-    "mysql": ["mysql"],
-
-    "html": ["html"],
-
-    "css": ["css"],
-
-    "git": [
-        "git",
-        "github"
-    ],
-
-    "docker": ["docker"],
-
-    "aws": ["aws"],
-
-    "tensorflow": ["tensorflow"],
-
-    "pytorch": ["pytorch"],
-
-    "data analysis": [
-        "data analysis",
-        "analytics"
-    ],
-
-    "communication": [
-        "communication"
-    ],
-
-    "leadership": [
-        "leadership"
-    ],
-
-    "problem solving": [
-        "problem solving"
-    ],
-
-    "teamwork": [
-        "teamwork"
-    ]
-}
+from preprocessing.skill_extraction_pipeline import extract_skills, extract_skills_simple
 
 
-def advanced_skill_extractor(text):
-
-    extracted_skills = set()
-
-    tokens = text.split()
-
-    clean_text = " ".join(tokens)
-
-    for standard_skill, variations in skill_variations.items():
-
-        for variation in variations:
-
-            variation = variation.lower()
-
-            if " " in variation:
-
-                if variation in clean_text:
-                    extracted_skills.add(
-                        standard_skill
-                    )
-
-            else:
-
-                if variation in tokens:
-                    extracted_skills.add(
-                        standard_skill
-                    )
-
-    return list(extracted_skills)
+def advanced_skill_extractor(text: str, enable_llm: bool = False):
+    """
+    Extract skills from text using the production-ready pipeline.
+    
+    This function uses regex-based extraction with normalization and categorization.
+    LLM-based extraction is available as an optional enhancement for improved accuracy.
+    
+    Args:
+        text: Input text (resume or job description)
+        enable_llm: Whether to enable LLM-based extraction (default: False)
+                    Set to True for enhanced accuracy at the cost of speed
+        
+    Returns:
+        For backward compatibility, returns a list of canonical skill names.
+        To access full metadata including categorization, use extract_skills() directly.
+        
+    Note:
+        This maintains backward compatibility with existing code that expects
+        a simple list of skill strings. For full structured output, use:
+        
+        from preprocessing.skill_extraction_pipeline import extract_skills
+        result = extract_skills(text, enable_llm=True)
+        # result includes: extracted_skills, categorized_skills, confidence_score, etc.
+    """
+    return extract_skills_simple(text)

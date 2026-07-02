@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
+from backend.core.config import settings
+
 # ---------------------------------------------------
 # LOAD ENV VARIABLES
 # ---------------------------------------------------
@@ -13,7 +15,7 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 genai.configure(
-    api_key=os.getenv("GEMINI_API_KEY")
+    api_key=settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
 )
 
 # ---------------------------------------------------
@@ -154,7 +156,7 @@ Keep the response detailed, professional, practical, and actionable.
 """
 
         model = genai.GenerativeModel(
-            "gemini-2.5-flash"
+            settings.gemini_model
         )
 
         response = model.generate_content(

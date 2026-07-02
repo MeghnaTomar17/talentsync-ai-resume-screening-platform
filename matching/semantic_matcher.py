@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from backend.core.config import settings
 
 _model = None
 
@@ -11,7 +12,7 @@ def load_model():
     if _model is None:
 
         _model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
+            settings.embedding_model
         )
 
     return _model

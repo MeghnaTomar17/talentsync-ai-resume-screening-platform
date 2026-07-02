@@ -1,29 +1,40 @@
 import re
 import nltk
-
-resources = {
-    "corpora/stopwords": "stopwords",
-    "corpora/wordnet": "wordnet",
-    "corpora/omw-1.4": "omw-1.4",
-    "tokenizers/punkt": "punkt",
-}
-
-for resource_path, resource_name in resources.items():
-    try:
-        nltk.data.find(resource_path)
-    except LookupError:
-        nltk.download(resource_name)
-
 from bs4 import BeautifulSoup
-
 from nltk.corpus import stopwords
-
 from nltk.stem import WordNetLemmatizer
 
 
-stop_words = set(stopwords.words('english'))
+FALLBACK_STOP_WORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
+    "has", "he", "in", "is", "it", "its", "of", "on", "that", "the",
+    "to", "was", "were", "will", "with", "this", "these", "those",
+}
 
-lemmatizer = WordNetLemmatizer()
+
+def _load_stop_words():
+    try:
+        nltk.data.find("corpora/stopwords")
+        return set(stopwords.words("english"))
+    except LookupError:
+        return FALLBACK_STOP_WORDS
+
+
+class _IdentityLemmatizer:
+    def lemmatize(self, word):
+        return word
+
+
+def _load_lemmatizer():
+    try:
+        nltk.data.find("corpora/wordnet")
+        return WordNetLemmatizer()
+    except LookupError:
+        return _IdentityLemmatizer()
+
+
+stop_words = _load_stop_words()
+lemmatizer = _load_lemmatizer()
 
 
 def advanced_clean_text(text):

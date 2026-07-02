@@ -16,13 +16,14 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from matching.semantic_matcher import get_embeddings
+from backend.core.config import settings
 
 
 # ---------------------------------------------------
 # INDEX CONFIGURATION
 # ---------------------------------------------------
 
-INDEX_DIR = Path("faiss_index")
+INDEX_DIR = settings.faiss_index_path
 INDEX_FILE = INDEX_DIR / "job_index.faiss"
 METADATA_FILE = INDEX_DIR / "job_metadata.pkl"
 
