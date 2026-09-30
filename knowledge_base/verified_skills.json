@@ -1,0 +1,757 @@
+{
+    "langgraph": {
+        "skill": "LangGraph",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "crewai": {
+        "skill": "CrewAI",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "jwt": {
+        "skill": "JWT",
+        "valid": true,
+        "category": "Authentication Protocol"
+    },
+    "fastapi": {
+        "skill": "FastAPI",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "django": {
+        "skill": "Django",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "react": {
+        "skill": "React",
+        "valid": true,
+        "category": "Frontend Framework"
+    },
+    "angular": {
+        "skill": "Angular",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "vue.js": {
+        "skill": "Vue.js",
+        "valid": true,
+        "category": "Frontend Framework"
+    },
+    "node.js": {
+        "skill": "Node.js",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "python": {
+        "skill": "Python",
+        "valid": true,
+        "category": "Programming Language"
+    },
+    "java": {
+        "skill": "Java",
+        "valid": true,
+        "category": "Programming Language"
+    },
+    "javascript": {
+        "skill": "JavaScript",
+        "valid": true,
+        "category": "Programming Language"
+    },
+    "git": {
+        "skill": "Git",
+        "valid": true,
+        "category": "Version Control System"
+    },
+    "github": {
+        "skill": "GitHub",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "aws": {
+        "skill": "AWS",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "azure": {
+        "skill": "Azure",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "google cloud": {
+        "skill": "Google Cloud",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "mysql": {
+        "skill": "MySQL",
+        "valid": true,
+        "category": "Database"
+    },
+    "postgresql": {
+        "skill": "PostgreSQL",
+        "valid": true,
+        "category": "Database"
+    },
+    "mongodb": {
+        "skill": "MongoDB",
+        "valid": true,
+        "category": "Database"
+    },
+    "redis": {
+        "skill": "Redis",
+        "valid": true,
+        "category": "Database"
+    },
+    "apache kafka": {
+        "skill": "Apache Kafka",
+        "valid": true,
+        "category": "Database"
+    },
+    "apache spark": {
+        "skill": "Apache Spark",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "tensorflow": {
+        "skill": "TensorFlow",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "pytorch": {
+        "skill": "PyTorch",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "keras": {
+        "skill": "Keras",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "opencv": {
+        "skill": "OpenCV",
+        "valid": true,
+        "category": "Computer Vision Library"
+    },
+    "numpy": {
+        "skill": "NumPy",
+        "valid": true,
+        "category": "Library"
+    },
+    "pandas": {
+        "skill": "Pandas",
+        "valid": true,
+        "category": "Library"
+    },
+    "scikit-learn": {
+        "skill": "Scikit-learn",
+        "valid": true,
+        "category": "Machine Learning Library"
+    },
+    "kubernetes": {
+        "skill": "Kubernetes",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "docker": {
+        "skill": "Docker",
+        "valid": true,
+        "category": "Containerization Tool"
+    },
+    "hadoop": {
+        "skill": "Hadoop",
+        "valid": true,
+        "category": "Big Data Framework"
+    },
+    "apache hbase": {
+        "skill": "Apache HBase",
+        "valid": true,
+        "category": "NoSQL Database"
+    },
+    "redis labs": {
+        "skill": "Redis Labs",
+        "valid": true,
+        "category": "Cache"
+    },
+    "apache cassandra": {
+        "skill": "Apache Cassandra",
+        "valid": true,
+        "category": "NoSQL Database"
+    },
+    "graphql": {
+        "skill": "GraphQL",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "restful api": {
+        "skill": "RESTful API",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "http/2": {
+        "skill": "HTTP/2",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "https": {
+        "skill": "HTTPS",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "get": {
+        "skill": "get",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "contact": {
+        "skill": "contact",
+        "valid": false,
+        "category": "None"
+    },
+    "mobile": {
+        "skill": "mobile",
+        "valid": true,
+        "category": "Device"
+    },
+    "email": {
+        "skill": "email",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "gmail": {
+        "skill": "gmail",
+        "valid": false,
+        "category": "Email Service"
+    },
+    "com": {
+        "skill": "com",
+        "valid": false,
+        "category": "Domain Extension"
+    },
+    "personal": {
+        "skill": "personal",
+        "valid": false,
+        "category": "None"
+    },
+    "details": {
+        "skill": "details",
+        "valid": false,
+        "category": "None"
+    },
+    "current": {
+        "skill": "current",
+        "valid": true,
+        "category": "Time"
+    },
+    "location": {
+        "skill": "location",
+        "valid": true,
+        "category": "Geographic Information System (GIS)"
+    },
+    "sirkali": {
+        "skill": "sirkali",
+        "valid": false,
+        "category": "None"
+    },
+    "date": {
+        "skill": "date",
+        "valid": true,
+        "category": "Time"
+    },
+    "birth": {
+        "skill": "birth",
+        "valid": true,
+        "category": "Date"
+    },
+    "sep": {
+        "skill": "sep",
+        "valid": false,
+        "category": "None"
+    },
+    "gender": {
+        "skill": "gender",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "male": {
+        "skill": "male",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "marital": {
+        "skill": "marital",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "status": {
+        "skill": "status",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "single": {
+        "skill": "single",
+        "valid": true,
+        "category": "Marital Status"
+    },
+    "unmarried": {
+        "skill": "unmarried",
+        "valid": true,
+        "category": "Marital Status"
+    },
+    "skills": {
+        "skill": "skills",
+        "valid": false,
+        "category": "None"
+    },
+    "gis": {
+        "skill": "gis",
+        "valid": true,
+        "category": "Geographic Information System (GIS)"
+    },
+    "map": {
+        "skill": "map",
+        "valid": true,
+        "category": "GIS"
+    },
+    "arcgis": {
+        "skill": "arcgis",
+        "valid": true,
+        "category": "GIS"
+    },
+    "esri": {
+        "skill": "esri",
+        "valid": true,
+        "category": "GIS"
+    },
+    "server": {
+        "skill": "server",
+        "valid": true,
+        "category": "Hardware"
+    },
+    "desktop": {
+        "skill": "desktop",
+        "valid": true,
+        "category": "Hardware"
+    },
+    "ms": {
+        "skill": "ms",
+        "valid": false,
+        "category": "None"
+    },
+    "office": {
+        "skill": "office",
+        "valid": true,
+        "category": "Software"
+    },
+    "qgis": {
+        "skill": "qgis",
+        "valid": true,
+        "category": "GIS"
+    },
+    "languages": {
+        "skill": "languages",
+        "valid": true,
+        "category": "Language"
+    },
+    "known": {
+        "skill": "known",
+        "valid": false,
+        "category": "None"
+    },
+    "english": {
+        "skill": "english",
+        "valid": true,
+        "category": "Language"
+    },
+    "tamil": {
+        "skill": "tamil",
+        "valid": true,
+        "category": "Language"
+    },
+    "hindi": {
+        "skill": "hindi",
+        "valid": true,
+        "category": "Language"
+    },
+    "education": {
+        "skill": "education",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "history": {
+        "skill": "history",
+        "valid": false,
+        "category": "None"
+    },
+    "post": {
+        "skill": "post",
+        "valid": false,
+        "category": "None"
+    },
+    "graduation": {
+        "skill": "graduation",
+        "valid": true,
+        "category": "Education"
+    },
+    "course": {
+        "skill": "course",
+        "valid": true,
+        "category": "Education"
+    },
+    "science": {
+        "skill": "science",
+        "valid": true,
+        "category": "Subject"
+    },
+    "geology": {
+        "skill": "geology",
+        "valid": true,
+        "category": "Subject"
+    },
+    "college": {
+        "skill": "college",
+        "valid": true,
+        "category": "Education"
+    },
+    "annamalai": {
+        "skill": "annamalai",
+        "valid": false,
+        "category": "None"
+    },
+    "university": {
+        "skill": "university",
+        "valid": true,
+        "category": "Education"
+    },
+    "year": {
+        "skill": "year",
+        "valid": true,
+        "category": "Time"
+    },
+    "passing": {
+        "skill": "passing",
+        "valid": true,
+        "category": "Grade"
+    },
+    "grade": {
+        "skill": "grade",
+        "valid": true,
+        "category": "Grade"
+    },
+    "alagappa": {
+        "skill": "alagappa",
+        "valid": false,
+        "category": "None"
+    },
+    "government": {
+        "skill": "government",
+        "valid": true,
+        "category": "Demographic"
+    },
+    "arts": {
+        "skill": "arts",
+        "valid": true,
+        "category": "Subject"
+    },
+    "karaikudi": {
+        "skill": "karaikudi",
+        "valid": false,
+        "category": "None"
+    },
+    "class": {
+        "skill": "class",
+        "valid": true,
+        "category": "Education"
+    },
+    "xii": {
+        "skill": "xii",
+        "valid": true,
+        "category": "Grade"
+    },
+    "board": {
+        "skill": "board",
+        "valid": true,
+        "category": "Education"
+    },
+    "nadu": {
+        "skill": "nadu",
+        "valid": false,
+        "category": "None"
+    },
+    "medium": {
+        "skill": "medium",
+        "valid": true,
+        "category": "Language"
+    },
+    "geo": {
+        "skill": "geo",
+        "valid": true,
+        "category": "GIS"
+    },
+    "chemistry": {
+        "skill": "chemistry",
+        "valid": true,
+        "category": "Subject"
+    },
+    "trace": {
+        "skill": "trace",
+        "valid": false,
+        "category": "None"
+    },
+    "elements": {
+        "skill": "elements",
+        "valid": true,
+        "category": "Chemistry"
+    },
+    "beach": {
+        "skill": "beach",
+        "valid": false,
+        "category": "None"
+    },
+    "deposits": {
+        "skill": "deposits",
+        "valid": false,
+        "category": "None"
+    },
+    "months": {
+        "skill": "months",
+        "valid": true,
+        "category": "Time"
+    },
+    "mapping": {
+        "skill": "mapping",
+        "valid": true,
+        "category": "GIS"
+    },
+    "sampling": {
+        "skill": "sampling",
+        "valid": true,
+        "category": "GIS"
+    },
+    "points": {
+        "skill": "points",
+        "valid": true,
+        "category": "GIS"
+    },
+    "environment": {
+        "skill": "environment",
+        "valid": true,
+        "category": "Subject"
+    },
+    "based": {
+        "skill": "based",
+        "valid": false,
+        "category": "None"
+    },
+    "concentration": {
+        "skill": "concentration",
+        "valid": true,
+        "category": "Chemistry"
+    },
+    "element": {
+        "skill": "element",
+        "valid": true,
+        "category": "Chemistry"
+    },
+    "detucting": {
+        "skill": "detucting",
+        "valid": false,
+        "category": "None"
+    },
+    "risks": {
+        "skill": "risks",
+        "valid": false,
+        "category": "None"
+    },
+    "express": {
+        "skill": "Express",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "api gateway": {
+        "skill": "API Gateway",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "aws lambda": {
+        "skill": "AWS Lambda",
+        "valid": true,
+        "category": "Cloud Platform"
+    },
+    "spring boot": {
+        "skill": "Spring Boot",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "hibernate": {
+        "skill": "Hibernate",
+        "valid": true,
+        "category": "Backend Framework"
+    },
+    "tensorflow.js": {
+        "skill": "TensorFlow.js",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "websockets": {
+        "skill": "WebSockets",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "rest": {
+        "skill": "REST",
+        "valid": true,
+        "category": "Protocol"
+    },
+    "tensor": {
+        "skill": "Tensor",
+        "valid": true,
+        "category": "AI Framework"
+    },
+    "geoserver": {
+        "skill": "GeoServer",
+        "valid": true,
+        "category": "GIS Tool"
+    },
+    "ms office": {
+        "skill": "MS Office",
+        "valid": false,
+        "category": "Software Suite"
+    },
+    "developed rest": {
+        "skill": "Developed REST",
+        "valid": false,
+        "category": ""
+    },
+    ".net": {
+        "skill": ".NET",
+        "valid": true,
+        "category": "software technology"
+    },
+    "archana": {
+        "skill": "ARCHANA",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "web technologies": {
+        "skill": "Web Technologies",
+        "valid": true,
+        "category": "software technology"
+    },
+    "arc map": {
+        "skill": "Arc Map",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "i do here by declare that the above statement is true to the best of my knowledge and believe": {
+        "skill": "I do here by declare that the above statement is true to the best of my knowledge and believe",
+        "valid": false,
+        "category": "Software Technology"
+    },
+    "language": {
+        "skill": "LANGUAGE",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "css": {
+        "skill": "CSS",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "django and react js": {
+        "skill": "Django and React js",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "geospatial tools": {
+        "skill": "Geospatial Tools",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "arcgis server": {
+        "skill": "Arcgis Server",
+        "valid": true,
+        "category": "software technology"
+    },
+    "web": {
+        "skill": "Web",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "arcgis desktop": {
+        "skill": "Arcgis Desktop",
+        "valid": true,
+        "category": "software technology"
+    },
+    "web & dev: html5": {
+        "skill": "Web & Dev: HTML5",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "btech in computer science engineering": {
+        "skill": "BTech in Computer Science Engineering",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "web technologies: html": {
+        "skill": "Web Technologies: HTML",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "languages known": {
+        "skill": "LANGUAGES KNOWN",
+        "valid": true,
+        "category": "software technology"
+    },
+    "role: python full stack developer": {
+        "skill": "Role: Python Full Stack Developer",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "cgpa : 8.4": {
+        "skill": "CGPA : 8.4",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "vs code": {
+        "skill": "VS Code",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "\\uf046 digitalization": {
+        "skill": "\\uf046 Digitalization",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "bairagi": {
+        "skill": "BAIRAGI",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "tourist": {
+        "skill": "Tourist",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "intern - gis": {
+        "skill": "Intern - GIS",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "css3": {
+        "skill": "CSS3",
+        "valid": true,
+        "category": "Front-end development"
+    },
+    "2011 - 2024": {
+        "skill": "2011 - 2024",
+        "valid": true,
+        "category": "Software Technology"
+    },
+    "krishinect": {
+        "skill": "KrishiNect",
+        "valid": true,
+        "category": "Software Technology"
+    }
+}
