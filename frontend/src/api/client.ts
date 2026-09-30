@@ -17,6 +17,16 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Show the backend's error message (e.g. "resume_text must not be empty")
+// instead of Axios' generic "Request failed with status code 400".
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error?.response?.data?.message;
+    return Promise.reject(message ? new Error(message) : error);
+  }
+);
+
 export async function unwrapResponse<T>(
   request: Promise<{ data: ApiResponse<T> }>
 ): Promise<T> {

@@ -1,9 +1,19 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Badge } from '@/components/ui/Badge';
+import { Progress } from '@/components/ui/Progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, EmptyState } from '@/components/ui/Card';
 import { getAnalysis, getUpload } from '@/store/resumeStore';
+import type { ScoreBreakdown } from '@/types/api';
 
 const colors = ['#2563eb', '#10b981', '#f59e0b'];
+
+function breakdownRows(breakdown: ScoreBreakdown) {
+  return [
+    { label: 'Semantic similarity', component: breakdown.components.semantic_similarity },
+    { label: 'Skill overlap', component: breakdown.components.skill_overlap },
+    { label: 'Resume quality', component: breakdown.components.resume_quality },
+  ];
+}
 
 export function ResumeAnalysisPage() {
   const analysis = getAnalysis();
@@ -25,7 +35,12 @@ export function ResumeAnalysisPage() {
         <div>
           <span className="section-kicker">Analysis dashboard</span>
           <h1>{analysis.best_match?.job_title || 'Resume analysis'}</h1>
-          <p>ATS scoring, parser quality, skills, and top semantic job matches.</p>
+          <p>
+            {analysis.job_source === 'provided'
+              ? 'Scored against the job description you provided.'
+              : 'Scored against the best matching job from the dataset.'}{' '}
+            ATS scoring, parser quality, skills, and top semantic job matches.
+          </p>
         </div>
       </section>
 
@@ -109,6 +124,50 @@ export function ResumeAnalysisPage() {
           </CardContent>
         </Card>
       </div>
+
+      {(analysis.partial_matches?.length ?? 0) > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Partially covered skills</CardTitle>
+            <CardDescription>Missing skills where the resume shows a closely related skill.</CardDescription>
+          </CardHeader>
+          <CardContent className="job-list">
+            {analysis.partial_matches?.map((partial) => (
+              <div className="partial-row" key={partial.skill}>
+                <Badge className="badge-warning">{partial.skill}</Badge>
+                <span>related: {partial.related_skills.join(', ')}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {analysis.score_breakdown && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Why this score?</CardTitle>
+            <CardDescription>{analysis.score_breakdown.formula}</CardDescription>
+          </CardHeader>
+          <CardContent className="page-stack">
+            {breakdownRows(analysis.score_breakdown).map((row) => (
+              <div className="breakdown-row" key={row.label}>
+                <div className="breakdown-label">
+                  <strong>{row.label}</strong>
+                  <span>
+                    {row.component.contribution.toFixed(1)} / {row.component.max_contribution.toFixed(0)} pts
+                  </span>
+                </div>
+                <Progress value={row.component.score} />
+              </div>
+            ))}
+            {(analysis.explanation?.length ?? 0) > 0 && (
+              <ul className="explanation-list">
+                {analysis.explanation?.map((reason) => <li key={reason}>{reason}</li>)}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

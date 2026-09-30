@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FileText, UploadCloud } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { Progress } from '@/components/ui/Progress';
 import { useToast } from '@/hooks/useToast';
 import { analyzeResume, uploadResume } from '@/services/resumeService';
@@ -13,6 +14,8 @@ export function ResumeUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
   const { showToast } = useToast();
 
   const mutation = useMutation({
@@ -23,7 +26,10 @@ export function ResumeUploadPage() {
       setProgress(70);
       // Send the original text: skill extraction needs symbols such as C++, C# and .NET.
       // The backend cleans the text itself for job retrieval.
-      const analysis = await analyzeResume(uploaded.resume_text || uploaded.cleaned_text || '');
+      const analysis = await analyzeResume(uploaded.resume_text || uploaded.cleaned_text || '', {
+        description: jobDescription,
+        title: jobTitle,
+      });
       saveAnalysis(analysis);
       setProgress(100);
       return { uploaded, analysis };
@@ -81,6 +87,35 @@ export function ResumeUploadPage() {
             </Button>
           </div>
           {error && <p className="field-error">{error}</p>}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Target job (optional)</CardTitle>
+          <CardDescription>
+            Paste a job description to score the resume against it. Leave empty to use the best match from the job dataset.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="form-stack">
+          <label className="field-label">
+            Job title
+            <Input
+              onChange={(event) => setJobTitle(event.target.value)}
+              placeholder="e.g. Backend Engineer"
+              value={jobTitle}
+            />
+          </label>
+          <label className="field-label">
+            Job description
+            <textarea
+              className="textarea"
+              onChange={(event) => setJobDescription(event.target.value)}
+              placeholder="Paste the job description here"
+              rows={8}
+              value={jobDescription}
+            />
+          </label>
         </CardContent>
       </Card>
 

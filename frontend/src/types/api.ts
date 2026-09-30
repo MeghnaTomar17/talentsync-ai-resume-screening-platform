@@ -31,6 +31,30 @@ export interface ResumeUploadData {
 export interface AnalyzeResumeRequest {
   resume_text: string;
   enable_llm?: boolean;
+  job_description?: string;
+  job_title?: string;
+}
+
+export interface PartialMatch {
+  skill: string;
+  related_skills: string[];
+}
+
+export interface ScoreComponent {
+  score: number;
+  weight: number;
+  contribution: number;
+  max_contribution: number;
+}
+
+export interface ScoreBreakdown {
+  ats_score: number;
+  formula: string;
+  components: {
+    semantic_similarity: ScoreComponent;
+    skill_overlap: ScoreComponent;
+    resume_quality: ScoreComponent;
+  };
 }
 
 export interface JobMatch {
@@ -67,6 +91,10 @@ export interface AnalyzeResumeData {
   skill_overlap_score?: number | null;
   ats_score?: number | null;
   quality_report?: QualityReport | null;
+  partial_matches?: PartialMatch[];
+  score_breakdown?: ScoreBreakdown | null;
+  explanation?: string[];
+  job_source?: 'provided' | 'dataset';
 }
 
 export interface ResumeFeedbackRequest {
@@ -74,6 +102,7 @@ export interface ResumeFeedbackRequest {
   resume_skills: string[];
   job_title?: string;
   job_description?: string;
+  missing_skills?: string[];
 }
 
 export interface ResumeFeedbackData {
@@ -96,4 +125,52 @@ export interface CareerRoadmapData {
 export interface ResumeWorkspaceState {
   uploaded?: ResumeUploadData;
   analysis?: AnalyzeResumeData;
+}
+
+export interface CandidateInput {
+  candidate_id: string;
+  resume_text: string;
+}
+
+export interface RankCandidatesRequest {
+  job_description: string;
+  job_title?: string;
+  candidates: CandidateInput[];
+  enable_llm?: boolean;
+}
+
+export interface CandidateRanking {
+  rank: number;
+  candidate_id: string;
+  ats_score: number;
+  semantic_score: number;
+  skill_overlap_score: number;
+  quality_score: number;
+  extracted_skills: string[];
+  matched_skills: string[];
+  missing_skills: string[];
+  partial_matches: PartialMatch[];
+  explanation: string[];
+}
+
+export interface SkillCount {
+  skill: string;
+  count: number;
+}
+
+export interface RankingSummary {
+  total_candidates: number;
+  average_ats_score?: number;
+  highest_ats_score?: number;
+  lowest_ats_score?: number;
+  top_candidate?: string;
+  most_common_missing_skills?: SkillCount[];
+  most_common_matched_skills?: SkillCount[];
+}
+
+export interface RankCandidatesData {
+  job_title: string;
+  job_skills: string[];
+  candidates: CandidateRanking[];
+  summary: RankingSummary;
 }

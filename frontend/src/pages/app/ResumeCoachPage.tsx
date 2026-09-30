@@ -16,12 +16,14 @@ export function ResumeCoachPage() {
   const analysis = getAnalysis();
 
   const query = useQuery({
-    enabled: Boolean(upload?.cleaned_text && analysis),
+    enabled: Boolean((upload?.resume_text || upload?.cleaned_text) && analysis),
     queryKey: ['resume-feedback', analysis?.best_match?.job_title],
     queryFn: () =>
       getResumeFeedback({
-        resume_text: upload?.cleaned_text || '',
+        // Original text reads better for the LLM than the cleaned (lowercased, no punctuation) text
+        resume_text: upload?.resume_text || upload?.cleaned_text || '',
         resume_skills: analysis?.extracted_skills || [],
+        missing_skills: analysis?.missing_skills || [],
         job_title: analysis?.best_match?.job_title,
         job_description: analysis?.best_match?.job_description,
       }),
@@ -50,7 +52,12 @@ export function ResumeCoachPage() {
   }
 
   if (query.isError) {
-    return <EmptyState title="Coach unavailable" description="The resume feedback endpoint returned an error." />;
+    return (
+      <EmptyState
+        title="Coach unavailable"
+        description={query.error instanceof Error ? query.error.message : 'The resume feedback endpoint returned an error.'}
+      />
+    );
   }
 
   const feedback = query.data?.feedback || '';

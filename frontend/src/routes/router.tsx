@@ -11,6 +11,7 @@ import { ResumeUploadPage } from '@/pages/app/ResumeUploadPage';
 import { ResumeAnalysisPage } from '@/pages/app/ResumeAnalysisPage';
 import { ResumeCoachPage } from '@/pages/app/ResumeCoachPage';
 import { CareerRoadmapPage } from '@/pages/app/CareerRoadmapPage';
+import { CandidateRankingPage } from '@/pages/app/CandidateRankingPage';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: 'analysis', element: <ResumeAnalysisPage /> },
       { path: 'coach', element: <ResumeCoachPage /> },
       { path: 'roadmap', element: <CareerRoadmapPage /> },
+      { path: 'ranking', element: <CandidateRankingPage /> },
     ],
   },
 ]);

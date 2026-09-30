@@ -9,6 +9,7 @@ import {
   Menu,
   Moon,
   UploadCloud,
+  Users,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useTheme } from '@/hooks/useTheme';
@@ -19,6 +20,7 @@ const navItems = [
   { to: '/app/analysis', label: 'Analysis', icon: FileSearch },
   { to: '/app/coach', label: 'AI Coach', icon: BrainCircuit },
   { to: '/app/roadmap', label: 'Roadmap', icon: Map },
+  { to: '/app/ranking', label: 'Candidate Ranking', icon: Users },
 ];
 
 function Breadcrumbs() {

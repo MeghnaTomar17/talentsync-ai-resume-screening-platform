@@ -92,6 +92,9 @@ button, input { font: inherit; }
 .auth-card p { margin: 6px 0 0; color: var(--muted); }
 .auth-card label { display: grid; gap: 8px; font-weight: 750; }
 .input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+.textarea { width: 100%; min-height: 140px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
+.form-stack { display: grid; gap: 14px; }
+.field-label { display: grid; gap: 8px; font-weight: 750; }
 .field-error { color: var(--danger); font-size: 13px; font-weight: 700; }
 .auth-links, .auth-switch { display: flex; justify-content: space-between; gap: 12px; color: var(--primary); font-weight: 700; }
 
@@ -128,6 +131,17 @@ button, input { font: inherit; }
 .job-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: 8px; }
 .job-row span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-soft); font-weight: 800; }
 .job-row p { margin: 4px 0 0; color: var(--muted); }
+.partial-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--muted); }
+.breakdown-row { display: grid; gap: 8px; }
+.breakdown-label { display: flex; justify-content: space-between; gap: 12px; }
+.breakdown-label span { color: var(--muted); font-weight: 700; }
+.explanation-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); line-height: 1.55; }
+.ranking-row { display: block; padding: 14px; border: 1px solid var(--border); border-radius: 8px; }
+.ranking-row summary > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-soft); font-weight: 800; }
+.ranking-row summary p { margin: 4px 0 0; color: var(--muted); }
+.ranking-row summary { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 14px; align-items: center; cursor: pointer; list-style: none; }
+.ranking-row summary::-webkit-details-marker { display: none; }
+.ranking-details { display: grid; gap: 12px; margin-top: 14px; }
 .markdown-copy { white-space: pre-wrap; color: var(--muted); line-height: 1.65; }
 .timeline { display: grid; gap: 14px; }
 .timeline-item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; }
