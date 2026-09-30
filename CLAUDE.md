@@ -40,10 +40,11 @@ Known discrepancies are tracked in `docs/AUDIT.md`.
 11. Do not swap React, FastAPI, FAISS, Sentence Transformers or Gemini for other tech.
 12. Prefer small, reviewable commits.
 
-## 4. Current priority
+## 4. Current status and priority
 
-**Skill extraction reliability** comes before any new feature (handoff "CRITICAL PROJECT PRIORITY").
-Work loop: Inspect → Reproduce → Root cause → Smallest fix → Test → Compare with baseline → Document → Commit.
+All roadmap phases 1–9 (handoff §41) are implemented; phase 10 has a basic summary. Status table: `docs/AUDIT.md` §15.
+Skill extraction is guarded by `tests/test_skill_extraction.py::test_labelled_set_recall_and_precision` — keep it green.
+Work loop for any change: Inspect → Reproduce → Root cause → Smallest fix → Test → Compare with baseline → Document → Commit.
 Do not "fix" recall by extracting more words — false positives matter as much as misses.
 
 ## 5. Architecture (as it exists today)
@@ -52,18 +53,18 @@ Do not "fix" recall by extracting more words — false positives matter as much 
 React (frontend/)  →  FastAPI (backend/main.py + backend/services/)
                          ├─ pdf_parser/        multi-parser PDF extraction + quality scoring
                          ├─ preprocessing/     text cleaning, regex/alias skill extraction, normalizer, categorizer
-                         ├─ matching/          Sentence-Transformer similarity, ATS scorer
+                         ├─ matching/          Sentence-Transformer similarity, ATS scorer, skill gaps (partial matches)
                          ├─ retrieval/         FAISS job index (faiss_index/)
-                         └─ utils/             extraction quality, Gemini feedback + roadmap
+                         └─ utils/             extraction quality, score explanation, Gemini feedback + roadmap
 app/streamlit_app.py  = legacy/demo UI (React is the canonical frontend)
 ```
 
 ## 6. Commands
 
 ```bash
-# backend (from repo root)
+# backend (from repo root, Python >= 3.11)
 python -m venv .venv && .venv\Scripts\activate      # Windows
-pip install -r requirements.txt  faiss-cpu pytest
+pip install -r requirements.txt
 uvicorn backend.main:app --reload
 
 # frontend

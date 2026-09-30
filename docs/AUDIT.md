@@ -49,7 +49,7 @@ React ──► FastAPI /upload_resume ──► pdf_parser (best of 4 parsers) 
 | Item | Status |
 |---|---|
 | Entry point | `backend/main.py` (`uvicorn backend.main:app`) |
-| Routes | `GET /`, `GET /health`, `POST /upload_resume`, `POST /analyze_resume`, `POST /resume_feedback`, `POST /career_roadmap` |
+| Routes | `GET /`, `GET /health`, `POST /upload_resume`, `POST /analyze_resume`, `POST /resume_feedback`, `POST /career_roadmap` (+ `POST /rank_candidates` added after the audit) |
 | Response envelope | `APIResponse{success, message, data, timestamp, processing_time}` |
 | Errors | central handlers for `TalentSyncError`, HTTP, validation, unhandled |
 | Logging | rotating file `logs/talentsync-api.log` + console |
@@ -89,20 +89,17 @@ ATS = 0.4 × semantic_score + 0.3 × skill_overlap_score + 0.3 × quality_score
 
 ## 7. Skill-gap status
 
-Matched = set intersection, Missing = job − resume (exact canonical strings). **Partial/related skills are not implemented.**
-Before this audit the extracted skills were unreliable (see `SKILL_EXTRACTION_EVALUATION.md`), so matched/missing lists were largely noise.
+Matched = set intersection, Missing = job − resume (exact canonical strings). At audit time partial/related skills were not implemented (now added, see D3) and the extracted skills were unreliable (see `SKILL_EXTRACTION_EVALUATION.md`), so matched/missing lists were largely noise.
 
 ## 8. LLM status
 
 - `utils/llm_feedback.py` (coach), `utils/career_roadmap.py` (roadmap), `preprocessing/llm_skill_extractor.py` (optional extraction). Model from settings: `gemini-2.5-flash`.
 - Uses the `google-generativeai` SDK, whose support has ended (Google recommends `google-genai`). Not changed.
-- Gemini failures are returned as normal text with `success: true`.
-- `FeedbackService` always passes `missing_skills=[]` to the coach prompt.
+- At audit time Gemini failures were returned as normal text with `success: true`, and `FeedbackService` always passed `missing_skills=[]` to the coach prompt (both fixed, B15).
 
 ## 9. Testing status
 
-Before: **no tests**. Now: `tests/` with 42 pytest tests (skill normalizer, skill extraction, PDF parser boundaries, labelled-set quality gate). All pass (`python -m pytest tests -q`).
-Not yet covered: API endpoints, FAISS retrieval, ATS scoring, frontend.
+Before: **no tests**. Now: `tests/` with 65 pytest tests — skill normalizer, skill extraction, labelled-set quality gate, PDF parser + OCR fallback, ATS formula, skill gaps, explanation, and every API endpoint (plus one integration test with the real FAISS index). All pass (`python -m pytest tests -q`). Frontend: `npm run build` (tsc + vite) and `oxlint` pass; no automated UI tests.
 
 ## 10. Git status
 
@@ -113,11 +110,7 @@ Not yet covered: API endpoints, FAISS retrieval, ATS scoring, frontend.
 
 - Root `.env.example` was missing → **added** (placeholders only). `frontend/.env.example` exists.
 - `.gitignore` correctly ignores `.env`, `.venv/`, `node_modules/`, `uploads/`, `logs/`, `temp_resume.pdf`.
-- `requirements.txt` problems (not changed, needs a decision):
-  - `faiss` is imported but **`faiss-cpu` is not listed**.
-  - Conflicting duplicate pins: `requests==2.32.3` and `requests==2.34.2`, `python-multipart==0.0.12` and `0.0.29`, `uvicorn[standard]==0.32.0` and `uvicorn==0.48.0` → `pip install -r requirements.txt` cannot resolve.
-  - `pywinpty` is Windows-only; the file is a full `pip freeze` including Jupyter tooling.
-  - `pytest` is not listed.
+- `requirements.txt` was not installable (duplicate conflicting pins for `requests`, `python-multipart`, `uvicorn`; `fastapi==0.115.0` incompatible with the pinned `starlette==1.1.0`; `faiss-cpu` and `pytest` missing). **Fixed**: kept the `pip freeze` versions, `fastapi==0.142.2`, added `faiss-cpu`, `pytest`, Windows-only marker on `pywinpty`. Resolution verified with `uv pip compile` (Python 3.12, Windows and Linux). The pins require **Python ≥ 3.11**.
 
 ## 12. Bugs / problems found
 
@@ -133,35 +126,52 @@ Not yet covered: API endpoints, FAISS retrieval, ATS scoring, frontend.
 | B8 | Skills | Categorizer knew Jest, Selenium, Flutter, Airflow, OAuth… but the alias map did not, so they were never extracted; HTML/CSS/Linux/Excel etc. missing entirely | **Fixed** (small controlled additions) |
 | B9 | Skills | `advanced_skill_extractor(enable_llm=False)` ignored its argument and called Gemini | **Fixed** |
 | B10 | Deps | Deterministic pipeline imported the Gemini SDK at import time; `pdf_parser` imported EasyOCR/torch at import time even with OCR disabled | **Fixed** (lazy imports) |
-| B11 | PDF | With `enable_ocr=True` (default) EasyOCR runs on **every** upload even when text parsers succeed (slow) | Open |
-| B12 | API | `enable_ocr` is a query parameter; the frontend sends it as a form field (ignored) | Open |
-| B13 | Privacy | Uploaded PDFs are saved to `uploads/` and never deleted (handoff §29) | Open |
-| B14 | API | CORS wildcard with credentials is rejected by browsers for credentialed requests | Open |
-| B15 | LLM | Coach never receives missing skills; Gemini errors reported as success | Open |
-| B16 | Frontend | Coach page sends cleaned text to Gemini (poor context) | Open |
-| B17 | Health | `/health` returns "ready" for all services without checking | Open |
+| B11 | PDF | With `enable_ocr=True` (default) EasyOCR runs on **every** upload even when text parsers succeed (slow) | **Fixed** — OCR only below confidence 50 |
+| B12 | API | `enable_ocr` is a query parameter; the frontend sent it as a form field (ignored) | **Fixed** in React (Streamlit legacy still sends a form field; default is the same) |
+| B13 | Privacy | Uploaded PDFs were saved to `uploads/` and never deleted (handoff §29) | **Fixed** — deleted right after parsing |
+| B14 | API | CORS wildcard with credentials | Not a bug in practice: Starlette echoes the request origin when credentials are allowed. Restrict `CORS_ORIGINS` for deployment |
+| B15 | LLM | Coach never received missing skills; Gemini errors reported as success | **Fixed** — `missing_skills` passed; failures return HTTP 502 |
+| B16 | Frontend | Coach page sent cleaned text to Gemini (poor context) | **Fixed** — original text sent |
+| B17 | Health | `/health` returned "ready" for all services without checking | **Fixed** — checks FAISS files, dataset and Gemini key |
 | B18 | PDF | Two-column resumes are read in interleaved order (e.g. EDUCATION / PROFESSIONAL EXPERIENCE headings adjacent). Does not affect bag-of-skills extraction; matters if section detection is added | Open |
 | B19 | Skills | Company names that equal a technology (`Oracle Towers Realty` → Oracle Database) still produce false positives | Known limitation |
+| B20 | Deps | `requirements.txt` could not be installed (conflicting pins, missing `faiss-cpu`) | **Fixed** — verified with `uv pip compile` for Python 3.12 on Windows and Linux |
+| B21 | Perf | FAISS index + 8 MB metadata pickle re-read from disk on every `/analyze_resume` | **Fixed** — cached after first load |
+| B22 | API | Empty resume text was analysed; axios showed generic error messages | **Fixed** — HTTP 400 + backend message shown in UI |
 
-## 13. Discrepancies (handoff vs code) — need a decision, not changed
+## 13. Discrepancies (handoff vs code) and how they were resolved
 
-| # | Handoff says | Code does |
-|---|---|---|
-| D1 | ATS 4:3:3 = 40 % skill, 30 % semantic, 30 % quality | 40 % **semantic**, 30 % **skill**, 30 % quality |
-| D2 | User pastes a job description | No JD input; resume is compared with the best FAISS-retrieved job from `datasets/jobs.csv` |
-| D3 | Partial / related skill category | Not implemented |
-| D4 | `utils/explainability.py` explains scores | Not used by the API; `ATSService.get_matched_missing_skills` duplicates it |
-| D5 | README describes Streamlit as the UI and FAISS as "planned" | React is the UI; FAISS is implemented |
-| D6 | Section-aware extraction | No section detection in the skill pipeline (skills are searched in the whole text) |
+| # | Handoff says | Code does | Resolution |
+|---|---|---|---|
+| D1 | ATS 4:3:3 = 40 % skill, 30 % semantic, 30 % quality | 40 % **semantic**, 30 % **skill**, 30 % quality | **Kept the code's weights** (handoff rule: implementation is the source of truth; never change weights without explicit instruction). Weights are now named constants and shown in the score breakdown. Change `SEMANTIC_WEIGHT` / `SKILL_OVERLAP_WEIGHT` in `matching/ats_scorer.py` if the team decides otherwise. |
+| D2 | User pastes a job description | No JD input | **Added** optional `job_description` to `/analyze_resume` and a JD box on the upload page; dataset matching remains the default |
+| D3 | Partial / related skill category | Not implemented | **Added** `matching/skill_gap.py` (`partial_matches`, explanation only, score unchanged) |
+| D4 | `utils/explainability.py` explains scores | Unused by API | **Extended** with `build_score_breakdown` / `generate_score_reasons`, used by the API |
+| D5 | README describes Streamlit as UI, FAISS as planned | React is the UI; FAISS implemented | **README updated** |
+| D6 | Section-aware extraction | No section detection | Open — skills are searched in the whole text, which already covers Experience/Projects sentences |
 
 ## 14. What is complete
 
 PDF multi-parser extraction + quality score · text cleaning · deterministic skill extraction (now validated) · normalization · categorisation · Sentence-Transformer embeddings · FAISS retrieval with TF-IDF fallback · ATS score · matched/missing skills · extraction quality report · Gemini coach · Gemini roadmap · FastAPI with envelopes/logging/errors · React dashboard, upload, analysis, coach, roadmap pages · test suite for extraction.
 
-## 15. What remains / recommended next phase
+## 15. Roadmap status (handoff §41)
 
-1. **Decide D1 and D2** (scoring weights, JD input). These change scores, so they need the developer's decision.
-2. Fix `requirements.txt` (add `faiss-cpu`, `pytest`; remove conflicting duplicate pins) and verify a clean install on both laptops.
-3. Put the project under git (clone the real repo) and commit the current changes in small commits (see `ENGINEERING_LOG.md`).
-4. Phase 2–4 of the handoff: API tests for `/analyze_resume`, ATS scoring tests, then partial/related skills.
-5. Open bugs B11–B17 (small, independent fixes).
+| Phase | Status |
+|---|---|
+| 1 Foundation (PDF → text → skills → normalization) | Done, validated (`SKILL_EXTRACTION_EVALUATION.md`) |
+| 2 Matching (resume ↔ JD) | Done — provided JD or best dataset job |
+| 3 ATS scoring | Done — formula tested, weights as named constants (D1 kept) |
+| 4 Skill gaps (matched / partial / missing) | Done |
+| 5 API | Done — `/rank_candidates` added, validation, error codes, health checks, tests |
+| 6 Frontend | Done — JD input, score breakdown, partial skills, ranking page |
+| 7 Explainability | Done — breakdown + deterministic reasons |
+| 8 AI Coach | Existing; now receives missing skills and original text; failures surfaced |
+| 9 Candidate ranking | Done (backend + page) |
+| 10 Recruiter analytics | Basic summary in ranking (average, top, common gaps); full dashboard not built |
+
+**Remaining**
+
+1. Put the project under git (clone the real repo, copy these changes) and commit in the order listed in `ENGINEERING_LOG.md`.
+2. Confirm D1 (weights) with the team.
+3. Migrate `google-generativeai` → `google-genai` (old SDK no longer supported) — needs a Gemini key to test.
+4. Section detection (D6), multi-column PDF ordering (B18), authentication (UI only today), full recruiter dashboard.

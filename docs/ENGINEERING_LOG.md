@@ -52,3 +52,70 @@ New pytest suite `tests/` (42 tests): normalizer, extraction (symbols, prose sen
 
 **Result**  
 On the labelled set: **recall 5.4 % → 100 %, precision 6.0 % → 98.7 %**. One known false positive remains (company name *Oracle …* → Oracle Database).
+
+---
+
+## 2026-09-30 — Phase 1b: foundation hardening
+
+| Problem | Cause | Solution | Files |
+|---|---|---|---|
+| `pip install -r requirements.txt` fails | Conflicting duplicate pins; `fastapi==0.115.0` needs `starlette<0.39` but `starlette==1.1.0` is pinned; `faiss-cpu` missing | Kept freeze versions, `fastapi==0.142.2` (`starlette>=0.46`), added `faiss-cpu==1.15.1`, `pytest==9.1.1`, `pywinpty` Windows-only marker. Verified with `uv pip compile` for Python 3.12 (Windows + Linux) | `requirements.txt` |
+| Every upload ran EasyOCR | Pipeline always tried all parsers, OCR included | OCR only when best text-parser confidence < 50 (`OCR_FALLBACK_THRESHOLD`) | `pdf_parser/extraction_pipeline.py` |
+| Resumes kept on disk | Deletion was commented out | Delete in `finally` after parsing; a failed delete is logged, not fatal | `backend/services/resume_service.py` |
+| OCR flag ignored from React | Sent as form field, endpoint reads a query param | Send `?enable_ocr=true` | `frontend/src/services/resumeService.ts` |
+
+Tests: `test_ocr_is_skipped_when_text_extraction_is_good`, `test_ocr_runs_as_fallback_when_text_parsers_fail`, `test_upload_parses_pdf_and_deletes_file`.
+
+## 2026-09-30 — Phases 2–4, 7: JD matching, explainable score, partial skills
+
+- **Problem:** the handoff's core flow (paste a JD → score) did not exist; the score had no breakdown; no partial/related skills.
+- **Solution:**
+  - `/analyze_resume` accepts optional `job_description` / `job_title`. Semantic score uses the same Sentence Transformer (`RetrievalService.score_job_description`, TF-IDF fallback like retrieval). Without a JD the old behaviour (best FAISS job) is unchanged. `job_source` tells which was used.
+  - ATS weights moved to named constants (**same values 0.4/0.3/0.3**, see AUDIT D1). `utils/explainability.py` builds `score_breakdown` (score, weight, contribution per component) and plain-language `explanation` reasons — deterministic, no LLM.
+  - `matching/skill_gap.py`: controlled related-skill groups → `partial_matches`. `missing_skills` keeps its old meaning (all unmatched job skills) so roadmap/coach consumers are unaffected; the score is unchanged.
+  - Scoring logic shared by `/analyze_resume` and `/rank_candidates` through one helper (`_score_resume_against_job`) so both always agree.
+- **Response schema:** additive only (`partial_matches`, `score_breakdown`, `explanation`, `job_source`); existing fields unchanged.
+- **Tests:** `tests/test_ats_scoring.py`, `tests/test_api.py`.
+
+## 2026-09-30 — Phases 5, 8, 9, 10: API hardening, coach inputs, candidate ranking
+
+- `POST /rank_candidates`: 1–50 resumes vs one JD, sorted by ATS score, each with matched/missing/partial skills and reasons, plus a summary (average/highest/lowest, top candidate, most common gaps/matched skills).
+- Empty resume/JD text → HTTP 400 (`InvalidInputError`). Gemini failures → HTTP 502 (`ExternalServiceError`) instead of "success" with an error text; the error marker is a constant shared by `utils/llm_feedback.py` / `utils/career_roadmap.py` and the services, so Streamlit still shows the same text.
+- Coach receives `missing_skills` and the original resume text.
+- `/health` checks FAISS files, jobs dataset and Gemini key (`degraded` when something is missing).
+- FAISS index + metadata cached after the first load (was ~11 MB read per request).
+
+## 2026-09-30 — Phase 6: frontend
+
+- Upload page: optional job title + description.
+- Analysis page: job source line, "Why this score?" card (component bars + reasons), partially covered skills.
+- Coach page: sends original text + missing skills; shows backend error message.
+- New Candidate Ranking page (`/app/ranking`, sidebar link): JD + multiple PDFs → ranked list with expandable reasons and gap summary.
+- Axios interceptor shows backend `message` instead of "Request failed with status code …".
+- Verified: `npm ci && npm run build` (tsc + vite) and `oxlint` pass (built in a scratch copy so `node_modules` never landed in the OneDrive folder).
+
+## Verification (end-to-end, real FAISS + all-MiniLM-L6-v2)
+
+- `python -m pytest tests -q` → **65 passed**.
+- Upload `temp_resume.pdf` → analyze against a pasted .NET JD: 9 matched, 8 missing, 3 partial (Angular ← AngularJS, SQL Server ← SQL), ATS 67.45 with reasons.
+- Rank IT-manager vs .NET resumes for that JD → .NET developer first (67.45 vs 45.45).
+- No Gemini key → `/resume_feedback` returns 502 with a clear message; `/health` reports `degraded`.
+
+## Suggested commits (once the project is in git)
+
+No AI attribution lines — see `CLAUDE.md`.
+
+```text
+docs: add CLAUDE.md, repository audit and engineering log
+fix: extract skills from original text and repair skill normalization
+test: add skill extraction evaluation set and regression tests
+fix: make requirements installable and add faiss-cpu and pytest
+perf: run OCR only as fallback and cache the FAISS index
+fix: delete uploaded resumes after parsing
+feat: score resumes against a provided job description
+feat: add explainable ATS score breakdown and partial skill matches
+feat: add candidate ranking endpoint with summary analytics
+fix: pass missing skills to coach and report Gemini failures as errors
+feat: add JD input, score explanation and candidate ranking pages
+docs: update README and backend API docs
+```

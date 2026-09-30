@@ -68,7 +68,7 @@ Powered by Google Gemini
 
 ### Interactive Dashboard
 
-Built with Streamlit
+Built with React (canonical UI, `frontend/`); the earlier Streamlit dashboard (`app/`) is kept as a legacy demo
 
 * PDF Resume Upload
 * Real-Time Analysis
@@ -146,9 +146,15 @@ Built with Streamlit
 * Regex
 * python-dotenv
 
+## Backend
+
+* FastAPI (`backend/`)
+* FAISS (`faiss-cpu`) vector search
+
 ## Frontend
 
-* Streamlit
+* React + TypeScript + Vite (`frontend/`)
+* Streamlit (legacy demo, `app/`)
 
 ## Development Tools
 
@@ -296,6 +302,39 @@ Career Roadmap Generation
 
 ---
 
+# Setup & Running
+
+```bash
+# Backend (repository root, Python 3.11+)
+python -m venv .venv
+.venv\Scripts\activate            # Windows  (source .venv/bin/activate on macOS/Linux)
+pip install -r requirements.txt
+copy .env.example .env              # then add GEMINI_API_KEY
+uvicorn backend.main:app --reload   # http://localhost:8000/docs
+
+# Frontend
+cd frontend
+npm install
+npm run dev                         # http://localhost:5173
+```
+
+---
+
+# API Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | Service status (FAISS index, Gemini key) |
+| POST | `/upload_resume` | Parse a PDF resume (`?enable_ocr=true`) |
+| POST | `/analyze_resume` | Skills, ATS score, matched/missing/partial skills, explanation; optional `job_description` |
+| POST | `/rank_candidates` | Rank up to 50 resumes against one job description |
+| POST | `/resume_feedback` | Gemini AI resume coach |
+| POST | `/career_roadmap` | Gemini 30-day learning roadmap |
+
+Details: `backend/README.md`.
+
+---
+
 # Running Tests
 
 ```bash
@@ -326,7 +365,8 @@ See `docs/AUDIT.md` for the current audit, known discrepancies and open issues, 
 
 * Skill vocabulary is technology-focused; non-technical resumes get few skills.
 * Company names that are also technology names (e.g. "Oracle ...") can be detected as skills.
-* No partial/related skill matching yet; resumes are compared with dataset jobs, not a user-supplied job description.
+* Partial/related skills come from a small, hand-maintained list (`matching/skill_gap.py`) and do not change the score.
+* Semantic similarity compares whole documents; long resumes vs short job descriptions tend to score in a narrow 40-80 range.
 * Two-column PDFs may be extracted in interleaved reading order.
 
 ---
@@ -351,10 +391,10 @@ Current Capabilities:
 
 ### AI Engineering Roadmap
 
-* FAISS Vector Search
+* ~~FAISS Vector Search~~ (done)
+* ~~Multi-Resume Candidate Ranking~~ (done: `/rank_candidates`, Candidate Ranking page)
 * Vector Database Integration
-* Multi-Resume Candidate Ranking
-* Recruiter Dashboard
+* Recruiter Dashboard (basic ranking summary done)
 * Resume Bullet Rewriter
 * Interview Preparation Assistant
 * Multi-Language Resume Analysis
