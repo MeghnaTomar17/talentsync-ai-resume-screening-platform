@@ -1,13 +1,14 @@
 altair==6.1.0
 # FastAPI Backend
-fastapi==0.115.0
-uvicorn[standard]==0.32.0
-python-multipart==0.0.12
-requests==2.32.3
+fastapi==0.142.2
 # PDF Parsing - Multi-Layer Extraction Pipeline
 pymupdf==1.25.5
 pypdf==5.3.0
 easyocr==1.7.2
+# Vector search (imported by retrieval/faiss_retriever.py)
+faiss-cpu==1.15.1
+# Tests
+pytest==9.1.1
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
@@ -140,7 +141,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-json-logger==4.1.0
 python-multipart==0.0.29
-pywinpty==3.0.3
+pywinpty==3.0.3; sys_platform == "win32"
 PyYAML==6.0.3
 pyzmq==27.1.0
 referencing==0.37.0
@@ -192,7 +193,7 @@ tzdata==2026.2
 uri-template==1.3.0
 uritemplate==4.2.0
 urllib3==2.7.0
-uvicorn==0.48.0
+uvicorn[standard]==0.48.0
 wasabi==1.1.3
 watchdog==6.0.0
 wcwidth==0.7.0
