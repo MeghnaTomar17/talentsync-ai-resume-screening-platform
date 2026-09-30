@@ -1,3 +1,10 @@
+# ATS score weights (4 : 3 : 3). Kept as named constants so the score
+# breakdown shown to users always uses the same numbers as the formula.
+SEMANTIC_WEIGHT = 0.4
+SKILL_OVERLAP_WEIGHT = 0.3
+QUALITY_WEIGHT = 0.3
+
+
 def calculate_skill_overlap(
     resume_skills,
     job_skills
@@ -60,11 +67,11 @@ def calculate_final_ats_score(
 ):
 
     final_score = (
-        semantic_score * 0.4
+        semantic_score * SEMANTIC_WEIGHT
         +
-        skill_overlap_score * 0.3
+        skill_overlap_score * SKILL_OVERLAP_WEIGHT
         +
-        quality_score * 0.3
+        quality_score * QUALITY_WEIGHT
     )
 
     return round(final_score, 2)
