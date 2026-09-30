@@ -296,6 +296,41 @@ Career Roadmap Generation
 
 ---
 
+# Running Tests
+
+```bash
+pip install pytest
+python -m pytest tests -q                          # unit + regression tests
+python tests/evaluate_skill_extraction.py          # skill extraction recall / precision report
+```
+
+---
+
+# Scoring Methodology (as implemented)
+
+```text
+ATS = 0.4 × semantic similarity + 0.3 × skill overlap + 0.3 × resume quality
+```
+
+* Semantic similarity: cosine similarity (FAISS, all-MiniLM-L6-v2) between the cleaned resume and the best-matching job.
+* Skill overlap: matched job skills / all job skills × 100.
+* Resume quality: ATS component of the extraction quality report.
+
+Skills are extracted from the **original** resume/job text (symbols such as C++, C#, .NET must survive); retrieval uses the cleaned text.
+
+See `docs/AUDIT.md` for the current audit, known discrepancies and open issues, `docs/SKILL_EXTRACTION_EVALUATION.md` for extraction quality, and `docs/ENGINEERING_LOG.md` for engineering decisions.
+
+---
+
+# Known Limitations
+
+* Skill vocabulary is technology-focused; non-technical resumes get few skills.
+* Company names that are also technology names (e.g. "Oracle ...") can be detected as skills.
+* No partial/related skill matching yet; resumes are compared with dataset jobs, not a user-supplied job description.
+* Two-column PDFs may be extracted in interleaved reading order.
+
+---
+
 # Current Version
 
 ### TalentSync AI v0.4
