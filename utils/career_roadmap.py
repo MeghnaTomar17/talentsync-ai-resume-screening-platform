@@ -15,6 +15,10 @@ genai.configure(
 )
 
 
+# Returned text starts with this marker when generation failed
+ROADMAP_ERROR_PREFIX = "Roadmap generation failed"
+
+
 def generate_career_roadmap(
 
     target_job,
@@ -78,4 +82,4 @@ Output should be structured and actionable.
 
     except Exception as e:
 
-        return f"Roadmap generation failed: {str(e)}"
+        return f"{ROADMAP_ERROR_PREFIX}: {str(e)}"

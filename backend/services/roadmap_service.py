@@ -11,7 +11,8 @@ from typing import Dict, Any, List
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-from utils.career_roadmap import generate_career_roadmap
+from utils.career_roadmap import generate_career_roadmap, ROADMAP_ERROR_PREFIX
+from backend.core.exceptions import ExternalServiceError
 from backend.core.logger import logger
 
 
@@ -33,6 +34,11 @@ class RoadmapService:
         """
         target = target_role or "Career Growth"
         roadmap_text = generate_career_roadmap(target, resume_skills, missing_skills)
+        if roadmap_text.strip().startswith(ROADMAP_ERROR_PREFIX):
+            logger.error("gemini_roadmap_failed detail=%s", roadmap_text.strip()[:300])
+            raise ExternalServiceError(
+                "Career roadmap could not be generated. Check the Gemini API key, quota and internet connection."
+            )
         logger.info("gemini_roadmap_generated target=%s characters=%s", target, len(roadmap_text))
         
         return {

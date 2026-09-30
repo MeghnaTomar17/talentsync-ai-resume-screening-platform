@@ -18,6 +18,10 @@ genai.configure(
     api_key=settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
 )
 
+# Returned text starts with this marker when generation failed, so callers
+# (API services) can tell an error message from real feedback.
+FEEDBACK_ERROR_PREFIX = "Feedback Generation Failed"
+
 # ---------------------------------------------------
 # GENERATE RESUME FEEDBACK
 # ---------------------------------------------------
@@ -167,8 +171,7 @@ Keep the response detailed, professional, practical, and actionable.
 
     except Exception as e:
 
-        return f"""
- Feedback Generation Failed
+        return f"""{FEEDBACK_ERROR_PREFIX}
 
 Error:
 {str(e)}

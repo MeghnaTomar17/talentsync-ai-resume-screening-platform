@@ -26,6 +26,16 @@ class FileUploadError(TalentSyncError):
     message = "File upload failed"
 
 
+class InvalidInputError(TalentSyncError):
+    status_code = 400
+    message = "Invalid input"
+
+
+class ExternalServiceError(TalentSyncError):
+    status_code = 502
+    message = "External AI service failed"
+
+
 class MissingResourceError(TalentSyncError):
     status_code = 404
     message = "Required resource was not found"

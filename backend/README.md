@@ -77,11 +77,16 @@ Content-Type: application/json
 
 Request:
 {
-    "resume_text": "Extracted resume text...",
-    "enable_llm": false
+    "resume_text": "Extracted resume text (send the original text, not cleaned_text)",
+    "enable_llm": false,
+    "job_description": "Optional. Paste a JD to score against it",
+    "job_title": "Optional title for the JD"
 }
 
-Response:
+Without job_description the resume is scored against the best FAISS match
+from datasets/jobs.csv. top_jobs (recommendations) are always returned.
+
+Response (inside the standard envelope's "data"):
 {
     "success": true,
     "extracted_skills": ["Python", "JavaScript", "React"],
@@ -99,9 +104,37 @@ Response:
     "semantic_score": 85.0,
     "skill_overlap_score": 70.0,
     "ats_score": 77.5,
-    "quality_report": {...}
+    "quality_report": {...},
+    "partial_matches": [{"skill": "PostgreSQL", "related_skills": ["MySQL"]}],
+    "score_breakdown": {"ats_score": 77.5, "formula": "...", "components": {...}},
+    "explanation": ["Semantic similarity with the job is 85/100 (34.0 of 40 points).", "..."],
+    "job_source": "provided | dataset"
 }
 ```
+
+Empty or whitespace-only `resume_text` returns HTTP 400.
+
+### Rank Candidates
+
+```
+POST /rank_candidates
+Content-Type: application/json
+
+Request:
+{
+    "job_description": "Job description text",
+    "job_title": "Backend Engineer",
+    "candidates": [
+        {"candidate_id": "alice.pdf", "resume_text": "..."},
+        {"candidate_id": "bob.pdf", "resume_text": "..."}
+    ]
+}
+```
+
+1–50 candidates. Each is scored with exactly the same pipeline as `/analyze_resume`
+and the list is sorted by ATS score. The response includes per-candidate
+matched/missing/partial skills and explanations, plus a `summary`
+(total, average/highest/lowest score, most common gaps and matched skills).
 
 ### Resume Feedback
 
@@ -114,7 +147,8 @@ Request:
     "resume_text": "Resume text...",
     "resume_skills": ["Python", "JavaScript"],
     "job_title": "Software Engineer",
-    "job_description": "Job description..."
+    "job_description": "Job description...",
+    "missing_skills": ["AWS", "Docker"]
 }
 
 Response:
@@ -149,9 +183,9 @@ Response:
 
 ## Installation
 
-1. Install dependencies:
+1. Install dependencies (from the repository root):
 ```bash
-pip install fastapi uvicorn[standard] python-multipart
+pip install -r requirements.txt
 ```
 
 2. Ensure FAISS index is built:
@@ -169,12 +203,7 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ### Development Mode
 
-```bash
-cd backend
-python main.py
-```
-
-Or using uvicorn directly:
+Run from the repository root:
 ```bash
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -219,17 +248,23 @@ app.add_middleware(
 
 ## Error Handling
 
-All endpoints return standardized error responses:
+All endpoints return the standard envelope with `success: false`:
 
 ```json
 {
-    "detail": "Error message describing what went wrong"
+    "success": false,
+    "message": "Error message describing what went wrong",
+    "data": null,
+    "timestamp": "...",
+    "processing_time": 0.01
 }
 ```
 
 Common HTTP status codes:
 - 200: Success
-- 422: Validation error (invalid request)
+- 400: Invalid input (non-PDF upload, empty resume/job text)
+- 422: Validation error (invalid request body)
+- 502: Gemini feedback/roadmap could not be generated (key, quota, network)
 - 500: Internal server error
 
 ## Integration with Frontend
@@ -284,7 +319,7 @@ const analyzeResume = async (resumeText) => {
 
 ### FAISS Index
 - Ensure the FAISS index is built before running the backend
-- Index is loaded once at startup for efficiency
+- Index and metadata are loaded on the first request and cached in memory
 - Index size depends on job dataset
 
 ### LLM Calls
@@ -293,8 +328,8 @@ const analyzeResume = async (resumeText) => {
 - LLM calls add ~2-5 seconds per request
 
 ### File Uploads
-- Uploaded files are stored in the `uploads/` directory
-- Consider implementing cleanup for old uploads
+- Uploaded files are written to `uploads/` only while parsing and deleted afterwards (resumes contain personal data)
+- OCR (EasyOCR) only runs when the text parsers score below 50
 - Maximum file size can be configured in FastAPI
 
 ## Security Considerations
@@ -312,8 +347,8 @@ const analyzeResume = async (resumeText) => {
 
 ## Dependencies
 
-- FastAPI 0.115.0
-- Uvicorn 0.32.0
+- FastAPI 0.142.2
+- Uvicorn 0.48.0
 - Pydantic 2.x
 - All existing project dependencies (FAISS, Gemini, etc.)
 
@@ -325,7 +360,14 @@ Use the Swagger UI at http://localhost:8000/docs to test endpoints interactively
 
 ### Automated Testing
 
-Test endpoints using curl:
+```bash
+python -m pytest tests -q
+```
+
+`tests/test_api.py` covers every endpoint (retrieval is stubbed, plus one
+integration test with the real FAISS index).
+
+Manual checks with curl:
 
 ```bash
 # Health check

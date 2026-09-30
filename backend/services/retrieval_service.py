@@ -66,6 +66,35 @@ class RetrievalService:
         
         return formatted_jobs
     
+    def score_job_description(self, resume_text: str, job_description: str) -> float:
+        """
+        Semantic similarity (0-100) between a resume and a provided job description.
+        
+        Uses the same Sentence Transformer embeddings as FAISS retrieval, with
+        the same TF-IDF fallback when the embedding model is unavailable.
+        
+        Args:
+            resume_text: Cleaned resume text
+            job_description: Cleaned job description text
+            
+        Returns:
+            Similarity score (0-100)
+        """
+        try:
+            from matching.semantic_matcher import calculate_semantic_similarity
+            score = round(float(calculate_semantic_similarity(resume_text, job_description)), 2)
+            method = "embedding"
+        except Exception as exc:
+            logger.warning("semantic_scoring_failed error=%s", exc)
+            vectors = TfidfVectorizer(stop_words="english").fit_transform([
+                self._clean_for_tfidf(resume_text),
+                self._clean_for_tfidf(job_description),
+            ])
+            score = round(float(cosine_similarity(vectors[0:1], vectors[1:2])[0][0]) * 100, 2)
+            method = "tfidf"
+        logger.info("job_description_scored method=%s score=%s", method, score)
+        return max(0.0, score)
+    
     def get_best_match(self, resume_text: str) -> Dict[str, Any]:
         """
         Get the single best matching job.

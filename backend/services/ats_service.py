@@ -6,6 +6,7 @@ Handles ATS scoring and quality analysis.
 
 import sys
 from pathlib import Path
+from collections import Counter
 from typing import Dict, Any, List
 
 # Add parent directory to path for imports
@@ -17,6 +18,8 @@ from matching.ats_scorer import (
     calculate_final_ats_score
 )
 from utils.extraction_quality import analyze_extraction_quality
+from utils.explainability import build_score_breakdown, generate_score_reasons
+from matching.skill_gap import analyze_skill_gaps
 from backend.core.logger import logger
 
 
@@ -97,21 +100,75 @@ class ATSService:
         return report
     
     def get_matched_missing_skills(self, resume_skills: List[str], 
-                                    job_skills: List[str]) -> Dict[str, List[str]]:
+                                    job_skills: List[str]) -> Dict[str, Any]:
         """
-        Get matched and missing skills.
+        Get matched, missing and partially matched skills.
         
         Args:
             resume_skills: List of resume skills
             job_skills: List of job skills
             
         Returns:
-            Dictionary with matched and missing skills
+            Dictionary with matched_skills, missing_skills and partial_matches
+            (see matching/skill_gap.py)
         """
-        matched = list(set(resume_skills).intersection(set(job_skills)))
-        missing = list(set(job_skills) - set(resume_skills))
+        return analyze_skill_gaps(resume_skills, job_skills)
+    
+    def explain_score(self, semantic_score: float, skill_overlap_score: float,
+                      quality_score: float, ats_score: float,
+                      skill_comparison: Dict[str, Any],
+                      quality_report: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Build the score breakdown and plain-language reasons.
+        
+        Returns:
+            Dictionary with score_breakdown and explanation (list of strings)
+        """
+        breakdown = build_score_breakdown(
+            semantic_score,
+            skill_overlap_score,
+            quality_score,
+            ats_score
+        )
+        reasons = generate_score_reasons(
+            breakdown,
+            skill_comparison["matched_skills"],
+            skill_comparison["missing_skills"],
+            skill_comparison["partial_matches"],
+            quality_report
+        )
+        return {
+            "score_breakdown": breakdown,
+            "explanation": reasons
+        }
+    
+    def summarize_candidates(self, rankings: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Summary statistics for a ranked list of candidates (recruiter view).
+        
+        Args:
+            rankings: Candidate ranking dictionaries, highest score first
+            
+        Returns:
+            Dictionary with totals, average score and most common skills/gaps
+        """
+        if not rankings:
+            return {"total_candidates": 0}
+        
+        scores = [r["ats_score"] for r in rankings]
+        gap_counts = Counter(skill for r in rankings for skill in r["missing_skills"])
+        matched_counts = Counter(skill for r in rankings for skill in r["matched_skills"])
         
         return {
-            "matched_skills": matched,
-            "missing_skills": missing
+            "total_candidates": len(rankings),
+            "average_ats_score": round(sum(scores) / len(scores), 2),
+            "highest_ats_score": max(scores),
+            "lowest_ats_score": min(scores),
+            "top_candidate": rankings[0]["candidate_id"],
+            "most_common_missing_skills": [
+                {"skill": skill, "count": count} for skill, count in gap_counts.most_common(5)
+            ],
+            "most_common_matched_skills": [
+                {"skill": skill, "count": count} for skill, count in matched_counts.most_common(5)
+            ],
         }
