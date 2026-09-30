@@ -111,10 +111,15 @@ class ResumeService:
         # Save uploaded file
         file_path = self.save_uploaded_file(file_content, filename)
         
-        # Parse resume
-        parsed_result = self.parse_resume(file_path, enable_ocr=enable_ocr)
-        
-        # Clean up uploaded file (optional)
-        # os.remove(file_path)
+        try:
+            # Parse resume
+            parsed_result = self.parse_resume(file_path, enable_ocr=enable_ocr)
+        finally:
+            # Resumes contain personal data: do not keep the PDF after parsing
+            try:
+                Path(file_path).unlink(missing_ok=True)
+                logger.info("resume_file_deleted saved_path=%s", file_path)
+            except OSError as exc:
+                logger.warning("resume_file_delete_failed saved_path=%s error=%s", file_path, exc)
         
         return parsed_result
