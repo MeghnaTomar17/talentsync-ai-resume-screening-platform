@@ -27,6 +27,10 @@ INDEX_DIR = settings.faiss_index_path
 INDEX_FILE = INDEX_DIR / "job_index.faiss"
 METADATA_FILE = INDEX_DIR / "job_metadata.pkl"
 
+# Loaded indexes, keyed by directory. The index (3.5 MB) and metadata
+# (8 MB pickle) were previously read from disk on every request.
+_INDEX_CACHE: Dict[str, Tuple[Any, List[Dict[str, Any]]]] = {}
+
 
 # ---------------------------------------------------
 # NORMALIZE EMBEDDINGS
@@ -217,8 +221,11 @@ def retrieve_top_jobs(
     Returns:
         List of job metadata dictionaries with similarity scores added
     """
-    # Load index and metadata
-    index, job_metadata = load_faiss_index(index_dir)
+    # Load index and metadata (once per directory)
+    cache_key = str(Path(index_dir).resolve())
+    if cache_key not in _INDEX_CACHE:
+        _INDEX_CACHE[cache_key] = load_faiss_index(Path(index_dir))
+    index, job_metadata = _INDEX_CACHE[cache_key]
     
     # Generate query embedding using existing function
     from matching.semantic_matcher import get_embedding

@@ -19,16 +19,22 @@ from pdf_parser.ocr_parser import extract_text_with_ocr
 from pdf_parser.quality_evaluator import select_best_extraction
 
 
+# OCR is slow (EasyOCR + torch), so it only runs when the text-based parsers
+# did not produce a usable extraction (same 0-100 scale as "confidence").
+OCR_FALLBACK_THRESHOLD = 50
+
+
 class ExtractionPipeline:
     """
     Multi-layer PDF extraction pipeline with automatic parser selection.
     
     Strategy:
     1. Try PyMuPDF (fast, reliable for most PDFs)
-    2. Fall back to pdfplumber (good for complex layouts)
-    3. Fall back to pypdf (simple PDFs)
-    4. Fall back to EasyOCR (image-based/scanned PDFs)
-    5. Select best result based on quality evaluation
+    2. Try pdfplumber (good for complex layouts)
+    3. Try pypdf (simple PDFs)
+    4. Select best result based on quality evaluation
+    5. Only if that result is missing or below OCR_FALLBACK_THRESHOLD,
+       run EasyOCR (image-based/scanned PDFs) and select again
     """
     
     def __init__(self, enable_ocr: bool = True):
@@ -44,9 +50,7 @@ class ExtractionPipeline:
             ("pdfplumber", extract_text_with_pdfplumber),
             ("pypdf", extract_text_with_pypdf),
         ]
-        
-        if self.enable_ocr:
-            self.parsers.append(("EasyOCR", extract_text_with_ocr))
+        self.ocr_parser = ("EasyOCR", extract_text_with_ocr)
     
     def extract(self, pdf_path: str) -> Dict[str, Any]:
         """
@@ -67,29 +71,18 @@ class ExtractionPipeline:
         """
         extractions = []
         
-        # Try each parser in order
+        # Try each text parser in order
         for parser_name, parser_func in self.parsers:
-            try:
-                result = parser_func(pdf_path)
-                extractions.append(result)
-                
-                # If we got a good extraction, we can stop early
-                # (but we'll still evaluate all to find the best)
-                if result.get("success", False) and len(result.get("text", "")) > 500:
-                    # Continue to try other parsers to find the best
-                    pass
-                    
-            except Exception as e:
-                # Log error but continue to next parser
-                extractions.append({
-                    "text": "",
-                    "parser": parser_name,
-                    "success": False,
-                    "error": str(e)
-                })
+            extractions.append(self._run_parser(parser_name, parser_func, pdf_path))
         
         # Select the best extraction
         best_result = select_best_extraction(extractions)
+        
+        # OCR fallback only when the text parsers were not good enough
+        if self.enable_ocr and best_result["confidence"] < OCR_FALLBACK_THRESHOLD:
+            parser_name, parser_func = self.ocr_parser
+            extractions.append(self._run_parser(parser_name, parser_func, pdf_path))
+            best_result = select_best_extraction(extractions)
         
         # Add metadata about the pipeline run
         best_result["all_results"] = [
@@ -102,6 +95,19 @@ class ExtractionPipeline:
         ]
         
         return best_result
+    
+    def _run_parser(self, parser_name, parser_func, pdf_path: str) -> Dict[str, Any]:
+        """Run one parser and turn unexpected exceptions into a failed result."""
+        try:
+            return parser_func(pdf_path)
+        except Exception as e:
+            # Log error but continue to next parser
+            return {
+                "text": "",
+                "parser": parser_name,
+                "success": False,
+                "error": str(e)
+            }
     
     def extract_with_min_quality(self, pdf_path: str, min_confidence: int = 50) -> Dict[str, Any]:
         """
