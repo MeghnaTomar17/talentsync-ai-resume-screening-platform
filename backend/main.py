@@ -13,6 +13,7 @@ from backend.core.config import settings
 from backend.core.exceptions import FileUploadError, register_exception_handlers
 from backend.core.logger import logger
 from backend.core.responses import APIResponse, build_response, start_timer
+from preprocessing.text_cleaner import advanced_clean_text
 from backend.models import (
     ResumeUploadResponse,
     AnalyzeResumeRequest,
@@ -155,6 +156,14 @@ async def analyze_resume(request: AnalyzeResumeRequest):
         Complete analysis including skills, job matches, and ATS scores
     """
     start_time = start_timer()
+
+    # Skills are extracted from the original text. The cleaned text is
+    # lowercased and stripped of symbols, which destroys skills such as
+    # C++, C#, .NET and Node.js. Job retrieval and the quality report keep
+    # using the cleaned text exactly as before (cleaning is idempotent, so
+    # clients that still send cleaned text get the same retrieval result).
+    cleaned_resume_text = advanced_clean_text(request.resume_text)
+
     skill_result = skill_service.extract_skills(
         request.resume_text,
         enable_llm=request.enable_llm
@@ -164,7 +173,7 @@ async def analyze_resume(request: AnalyzeResumeRequest):
     categorized_skills = skill_result["categorized_skills"]
 
     jobs = retrieval_service.retrieve_jobs(
-        request.resume_text,
+        cleaned_resume_text,
         k=settings.default_job_match_count,
     )
 
@@ -188,7 +197,7 @@ async def analyze_resume(request: AnalyzeResumeRequest):
 
     best_job = jobs[0]
     job_skill_result = skill_service.extract_skills(
-        best_job["cleaned_description"],
+        best_job["job_description"],
         enable_llm=request.enable_llm
     )
     job_skills = job_skill_result["extracted_skills"]
@@ -198,7 +207,7 @@ async def analyze_resume(request: AnalyzeResumeRequest):
         job_skills
     )
     quality_report = ats_service.analyze_extraction_quality(
-        request.resume_text,
+        cleaned_resume_text,
         resume_skills
     )
     semantic_score = best_job["semantic_score"]

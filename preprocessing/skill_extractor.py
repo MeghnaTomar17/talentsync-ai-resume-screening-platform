@@ -32,4 +32,4 @@ def advanced_skill_extractor(text: str, enable_llm: bool = False):
         result = extract_skills(text, enable_llm=True)
         # result includes: extracted_skills, categorized_skills, confidence_score, etc.
     """
-    return extract_skills_simple(text)
+    return extract_skills(text, enable_llm=enable_llm)["extracted_skills"]

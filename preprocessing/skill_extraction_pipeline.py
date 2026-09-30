@@ -19,8 +19,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from preprocessing.regex_skill_extractor import extract_skills_with_confidence
-from preprocessing.llm_skill_extractor import extract_skills_with_llm, extract_skills_with_llm_detailed
-from preprocessing.skill_normalizer import normalize_skills
+from preprocessing.skill_normalizer import normalize_skills, is_known_skill
 from preprocessing.skill_categorizer import categorize_skills
 
 
@@ -72,6 +71,12 @@ class SkillExtractionPipeline:
         # Method 2: LLM-based extraction (if enabled)
         llm_skills = []
         if self.enable_llm:
+            # Imported only when needed so the deterministic pipeline does not
+            # require the Gemini SDK or an API key.
+            from preprocessing.llm_skill_extractor import (
+                extract_skills_with_llm,
+                extract_skills_with_llm_detailed,
+            )
             if self.use_llm_categorization:
                 # Use detailed LLM extraction with categorization
                 llm_result = extract_skills_with_llm_detailed(text)
@@ -96,6 +101,18 @@ class SkillExtractionPipeline:
         
         # Normalize skills (remove duplicates, canonicalize names)
         normalized_skills = normalize_skills([s[0] for s in all_raw_skills])
+        
+        # Keep only skills from the controlled vocabulary.
+        # The regex patterns (bullets, capitalized words, version numbers)
+        # also return names, places, verbs and headings ("Pune", "Developed",
+        # "SKILLS"); those candidates stay available in raw_skills for
+        # debugging but are not reported as skills. Skills suggested by the
+        # optional LLM are kept even when they are not in the vocabulary.
+        llm_skill_names = {s[0] for s in llm_skills}
+        normalized_skills = [
+            (skill, conf) for skill, conf in normalized_skills
+            if is_known_skill(skill) or skill in llm_skill_names
+        ]
         
         # Extract canonical skill names
         extracted_skills = [skill for skill, conf in normalized_skills]

@@ -73,6 +73,14 @@ SKILL_ALIASES = {
     "backbone": "Backbone.js",
     "backbonejs": "Backbone.js",
     "jquery": "jQuery",
+    "html": "HTML",
+    "html5": "HTML",
+    "css": "CSS",
+    "css3": "CSS",
+    "bootstrap": "Bootstrap",
+    "tailwind": "Tailwind CSS",
+    "tailwind css": "Tailwind CSS",
+    "redux": "Redux",
     
     # Backend Frameworks
     "node": "Node.js",
@@ -100,6 +108,13 @@ SKILL_ALIASES = {
     "tornado": "Tornado",
     "sanic": "Sanic",
     "aiohttp": "aiohttp",
+    ".net": ".NET",
+    "dotnet": ".NET",
+    ".net core": ".NET",
+    "asp.net core": "ASP.NET",
+    "asp.net mvc": "ASP.NET",
+    "web api": "Web API",
+    "webapi": "Web API",
     
     # Databases
     "mongodb": "MongoDB",
@@ -109,7 +124,6 @@ SKILL_ALIASES = {
     "postgres": "PostgreSQL",
     "sqlite": "SQLite",
     "redis": "Redis",
-    "elasticsearch": "Elasticsearch",
     "elasticsearch": "Elasticsearch",
     "cassandra": "Cassandra",
     "dynamodb": "DynamoDB",
@@ -151,6 +165,7 @@ SKILL_ALIASES = {
     "keras": "Keras",
     "scikit-learn": "scikit-learn",
     "sklearn": "scikit-learn",
+    "scikit learn": "scikit-learn",
     "pandas": "Pandas",
     "numpy": "NumPy",
     "scipy": "SciPy",
@@ -201,6 +216,11 @@ SKILL_ALIASES = {
     "datadog": "Datadog",
     "new relic": "New Relic",
     "splunk": "Splunk",
+    "ci/cd": "CI/CD",
+    "vmware": "VMware",
+    "linux": "Linux",
+    "unix": "Unix",
+    "microservices": "Microservices",
     
     # Tools & Libraries
     "git": "Git",
@@ -224,6 +244,8 @@ SKILL_ALIASES = {
     "graphql": "GraphQL",
     "rest": "REST API",
     "restful": "REST API",
+    "rest api": "REST API",
+    "rest apis": "REST API",
     "soap": "SOAP",
     "grpc": "gRPC",
     "websocket": "WebSocket",
@@ -232,6 +254,57 @@ SKILL_ALIASES = {
     "activemq": "ActiveMQ",
     "nginx": "Nginx",
     "apache": "Apache HTTP Server",
+    "json": "JSON",
+    "windows": "Windows",
+    "active directory": "Active Directory",
+    "microsoft office": "Microsoft Office",
+    "ms office": "Microsoft Office",
+    "microsoft exchange": "Microsoft Exchange",
+    "exchange server": "Microsoft Exchange",
+    "excel": "Microsoft Excel",
+    "ms excel": "Microsoft Excel",
+    "microsoft excel": "Microsoft Excel",
+
+    # Data Analysis & BI
+    "tableau": "Tableau",
+    "power bi": "Power BI",
+    "powerbi": "Power BI",
+    "qlikview": "QlikView",
+    "hadoop": "Hadoop",
+    
+    # Testing, Security, Data Engineering and Mobile
+    # (these canonical names already exist in skill_categorizer.py but had
+    # no alias entry, so they could never be extracted)
+    "jest": "Jest",
+    "mocha": "Mocha",
+    "selenium": "Selenium",
+    "cypress": "Cypress",
+    "playwright": "Playwright",
+    "pytest": "PyTest",
+    "junit": "JUnit",
+    "testng": "TestNG",
+    "rspec": "RSpec",
+    "phpunit": "PHPUnit",
+    "oauth": "OAuth",
+    "jwt": "JWT",
+    "owasp": "OWASP",
+    "penetration testing": "Penetration Testing",
+    "cybersecurity": "Cybersecurity",
+    "airflow": "Apache Airflow",
+    "apache airflow": "Apache Airflow",
+    "flink": "Apache Flink",
+    "dbt": "dbt",
+    "snowflake": "Snowflake",
+    "databricks": "Databricks",
+    "bigquery": "BigQuery",
+    "redshift": "Redshift",
+    "etl": "ETL",
+    "data warehousing": "Data Warehousing",
+    "flutter": "Flutter",
+    "ios": "iOS",
+    "android": "Android",
+    "xamarin": "Xamarin",
+    "ionic": "Ionic",
     
     # Soft Skills
     "communication": "Communication",
@@ -257,6 +330,44 @@ SKILL_ALIASES = {
 }
 
 
+# Aliases that are also ordinary English words, single letters or common
+# company/place names. Matching them case-insensitively anywhere in a resume
+# produced many false positives ("go the extra mile" -> Go, "Priya R" -> R,
+# "Swift Logistics" -> Swift). They are only accepted in a controlled form:
+#
+# LIST_ONLY_ALIASES      exact case, and only inside a list
+#                        (e.g. "Languages: C, C++, R" or "C/C++")
+# CASE_SENSITIVE_ALIASES exact case anywhere (e.g. "REST APIs", "MS Excel")
+LIST_ONLY_ALIASES = {
+    "c": "C",
+    "r": "R",
+    "go": "Go",
+    "spring": "Spring",
+    "swift": "Swift",
+    "dart": "Dart",
+    "express": "Express",
+    "chef": "Chef",
+    "puppet": "Puppet",
+}
+
+CASE_SENSITIVE_ALIASES = {
+    "rest": "REST",
+    "node": "Node",
+    "excel": "Excel",
+    "elk": "ELK",
+    "sketch": "Sketch",
+    "notion": "Notion",
+    "slack": "Slack",
+    "comet": "Comet",
+}
+
+AMBIGUOUS_ALIASES = set(LIST_ONLY_ALIASES) | set(CASE_SENSITIVE_ALIASES)
+
+
+# Canonical names, looked up case-insensitively (e.g. "rest api" -> "REST API")
+CANONICAL_SKILLS = {canonical.lower(): canonical for canonical in SKILL_ALIASES.values()}
+
+
 def normalize_skill(skill: str) -> Tuple[str, float]:
     """
     Normalize a skill to its canonical form.
@@ -266,26 +377,43 @@ def normalize_skill(skill: str) -> Tuple[str, float]:
         
     Returns:
         Tuple of (canonical_skill, confidence_score)
-        confidence_score: 1.0 for exact match, 0.8 for alias match
-    """
-    skill_lower = skill.lower().strip()
+        confidence_score: 1.0 for canonical match, 0.8 for alias match,
+                          0.5 when the skill is not in the vocabulary
+                          (returned unchanged)
     
-    # Check for exact match (case-insensitive)
-    for canonical, aliases in SKILL_ALIASES.items():
-        if canonical.lower() == skill_lower:
-            return (canonical, 1.0)
+    Note:
+        Earlier versions also mapped any string that *contained* an alias
+        (substring match). With short aliases such as "c", "r", "ts" or "go"
+        this mapped "REST API" -> "R" and "Pandas" style candidates to wrong
+        skills, so only exact matches are used now.
+    """
+    skill_clean = skill.strip()
+    skill_lower = skill_clean.lower()
+    
+    # Check for canonical name (case-insensitive)
+    if skill_lower in CANONICAL_SKILLS:
+        return (CANONICAL_SKILLS[skill_lower], 1.0)
     
     # Check for alias match
     if skill_lower in SKILL_ALIASES:
         return (SKILL_ALIASES[skill_lower], 0.8)
     
-    # Check if skill contains a known alias (substring match)
-    for alias, canonical in SKILL_ALIASES.items():
-        if alias.lower() in skill_lower or skill_lower in alias.lower():
-            return (canonical, 0.6)
-    
     # Return original if no match found
-    return (skill, 0.5)
+    return (skill_clean, 0.5)
+
+
+def is_known_skill(skill: str) -> bool:
+    """
+    Check whether a skill name belongs to the controlled skill vocabulary.
+    
+    Args:
+        skill: Skill name (raw or canonical)
+        
+    Returns:
+        True if the skill is a canonical name or a known alias
+    """
+    skill_lower = skill.strip().lower()
+    return skill_lower in CANONICAL_SKILLS or skill_lower in SKILL_ALIASES
 
 
 def normalize_skills(skills: List[str]) -> List[Tuple[str, float]]:

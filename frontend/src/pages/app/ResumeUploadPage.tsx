@@ -21,7 +21,9 @@ export function ResumeUploadPage() {
       const uploaded = await uploadResume(selectedFile);
       saveUpload(uploaded);
       setProgress(70);
-      const analysis = await analyzeResume(uploaded.cleaned_text || uploaded.resume_text || '');
+      // Send the original text: skill extraction needs symbols such as C++, C# and .NET.
+      // The backend cleans the text itself for job retrieval.
+      const analysis = await analyzeResume(uploaded.resume_text || uploaded.cleaned_text || '');
       saveAnalysis(analysis);
       setProgress(100);
       return { uploaded, analysis };

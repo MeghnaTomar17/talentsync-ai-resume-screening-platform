@@ -18,13 +18,14 @@ SKILL_CATEGORIES = {
     
     "Frontend Frameworks": {
         "React", "React Native", "Vue.js", "Angular", "AngularJS", "Svelte",
-        "Next.js", "Nuxt.js", "Gatsby", "Ember.js", "Backbone.js", "jQuery"
+        "Next.js", "Nuxt.js", "Gatsby", "Ember.js", "Backbone.js", "jQuery",
+        "HTML", "CSS", "Bootstrap", "Tailwind CSS", "Redux"
     },
     
     "Backend Frameworks": {
         "Node.js", "Express.js", "Django", "Flask", "FastAPI", "Spring Boot",
         "Ruby on Rails", "Laravel", "ASP.NET", "NestJS", "Koa.js", "Hapi.js",
-        "Falcon", "Tornado", "Sanic", "aiohttp"
+        "Falcon", "Tornado", "Sanic", "aiohttp", ".NET", "Web API"
     },
     
     "Databases": {
@@ -53,7 +54,8 @@ SKILL_CATEGORIES = {
         "Docker", "Kubernetes", "Jenkins", "GitLab", "GitHub Actions",
         "CircleCI", "Travis CI", "Ansible", "Terraform", "Pulumi", "Chef",
         "Puppet", "Helm", "ArgoCD", "Prometheus", "Grafana", "ELK Stack",
-        "Logstash", "Kibana", "Nagios", "Datadog", "New Relic", "Splunk"
+        "Logstash", "Kibana", "Nagios", "Datadog", "New Relic", "Splunk",
+        "CI/CD", "VMware", "Linux", "Unix", "Microservices"
     },
     
     "Tools & Libraries": {
@@ -61,7 +63,8 @@ SKILL_CATEGORIES = {
         "Jira", "Confluence", "Slack", "Trello", "Asana", "Notion", "Figma",
         "Sketch", "Adobe XD", "Postman", "Swagger", "OpenAPI", "GraphQL",
         "REST API", "SOAP", "gRPC", "WebSocket", "Apache Kafka", "RabbitMQ",
-        "ActiveMQ", "Nginx", "Apache HTTP Server"
+        "ActiveMQ", "Nginx", "Apache HTTP Server", "JSON", "Windows",
+        "Active Directory", "Microsoft Office", "Microsoft Exchange"
     },
     
     "Soft Skills": {
@@ -76,7 +79,11 @@ SKILL_CATEGORIES = {
     "Data Engineering": {
         "Apache Spark", "PySpark", "Apache Kafka", "Apache Flink",
         "Apache Airflow", "dbt", "Snowflake", "Databricks", "BigQuery",
-        "Redshift", "Data Warehousing", "ETL", "Data Pipelines"
+        "Redshift", "Data Warehousing", "ETL", "Data Pipelines", "Hadoop"
+    },
+    
+    "Data Analysis & BI": {
+        "Microsoft Excel", "Tableau", "Power BI", "QlikView"
     },
     
     "Mobile Development": {

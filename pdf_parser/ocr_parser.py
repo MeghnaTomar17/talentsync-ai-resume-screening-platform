@@ -5,7 +5,6 @@ OCR-based fallback parser for image-based or scanned PDFs.
 Uses EasyOCR to extract text from images when traditional parsers fail.
 """
 
-import easyocr
 import numpy as np
 from typing import Dict, Any
 import fitz  # PyMuPDF for page-to-image conversion
@@ -21,6 +20,10 @@ def get_ocr_reader():
     """
     global _ocr_reader
     if _ocr_reader is None:
+        # Imported here so the text parsers keep working (and OCR can be
+        # disabled) on machines where EasyOCR/torch is not installed.
+        import easyocr
+
         # Initialize with English language
         _ocr_reader = easyocr.Reader(['en'], gpu=False)
     return _ocr_reader
